@@ -350,6 +350,12 @@ function Block({
   const showArt = Boolean(real && art);
   // الوضع الفوتوغرافي: مجسم المعدة فقط، بلا صندوق CAD ولا أسطر مواصفات.
   if (showArt) {
+    // تكبير المجسم حول مركز الصندوق ليظهر بتفاصيل أوضح وأقرب للواقع.
+    const SC = 1.3;
+    const cx = x + w / 2;
+    const cy = y + (h - 14) / 2;
+    const label = `${title}${lines[0] ? ` — ${lines[0]}` : ""}`;
+    const lw = Math.max(w + 24, label.length * 4.6);
     return (
       <g
         style={clickable ? { cursor: "pointer" } : undefined}
@@ -357,28 +363,53 @@ function Block({
       >
         {active && (
           <rect
-            x={x - 6}
-            y={y - 6}
-            width={w + 12}
-            height={h + 12}
+            x={cx - (w * SC) / 2 - 8}
+            y={cy - ((h - 14) * SC) / 2 - 8}
+            width={w * SC + 16}
+            height={(h - 14) * SC + 30}
+            rx={6}
             fill="none"
             stroke={accent}
-            strokeWidth={2.2}
+            strokeWidth={2.4}
             strokeDasharray="6 4"
           />
         )}
-        <EquipArt kind={art!} x={x} y={y} w={w} h={h - 14} accent={accent} />
-        <text
-          x={x + w / 2}
-          y={y + h + 2}
-          textAnchor="middle"
-          fontFamily={F}
-          fontSize={9}
-          fontWeight={700}
-          fill={C.ink}
-        >
-          {title}
-        </text>
+        <g transform={`translate(${cx} ${cy}) scale(${SC}) translate(${-cx} ${-cy})`}>
+          <EquipArt kind={art!} x={x} y={y} w={w} h={h - 14} accent={accent} />
+        </g>
+        {/* ظل أرضي ناعم يثبّت المجسم بصرياً */}
+        <ellipse
+          cx={cx}
+          cy={cy + ((h - 14) * SC) / 2 + 4}
+          rx={(w * SC) / 2.6}
+          ry={3.4}
+          fill={C.soft}
+          opacity={0.22}
+        />
+        <g>
+          <rect
+            x={cx - lw / 2}
+            y={cy + ((h - 14) * SC) / 2 + 9}
+            width={lw}
+            height={15}
+            rx={7.5}
+            fill={C.band}
+            stroke={accent}
+            strokeWidth={1}
+            opacity={0.95}
+          />
+          <text
+            x={cx}
+            y={cy + ((h - 14) * SC) / 2 + 19.6}
+            textAnchor="middle"
+            fontFamily={F}
+            fontSize={9}
+            fontWeight={700}
+            fill={C.ink}
+          >
+            {label}
+          </text>
+        </g>
       </g>
     );
   }

@@ -1615,7 +1615,8 @@ export function SldSvg({
         })()}
 
       {/* ── شبكة التأريض الشاملة ومانعات الصواعق (IEC 60364-7-712) ───────── */}
-      {(() => {
+      {!real &&
+        (() => {
         const bonds: { x: number; label: string }[] = [
           { x: xPv + 60, label: "ARRAY FRAMES 6 mm²" },
           ...(dc ? [{ x: xDc + wDc / 2, label: "DC BOARD + SPD" }] : []),

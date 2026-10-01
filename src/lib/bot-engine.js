@@ -5496,7 +5496,9 @@ export function runStateMachine(__session, __parsed, __itemPrices) {
   // دراسة PVsyst لا تُرسل تلقائياً مع عرض السعر تُرسل فقط بعد سؤال العميل وموافقته (خطوة study_ask / pv_study_ask)
 
   // ===================== معاملات دراسة PVsyst للمنظومة المختارة =====================
-  if (send_study_file && !pv_flow) {
+  // تُبنى معاملات الدراسة أيضاً مع صدور عرض السعر الرسمي حتى يتوفر زر دراسة الجدوى الاقتصادية فوراً
+  var __buildStudy = (send_study_file || send_quote_file);
+  if (__buildStudy && !pv_flow) {
     try {
       if (menu_choice === '2') {
         // الدراسة تقرأ نفس قرار المنظومة الموحد (بدون إعادة اختيار)

@@ -403,7 +403,7 @@ function Block({
         y={y + 12}
         textAnchor="middle"
         fontFamily={F}
-        fontSize={Math.max(6.6, Math.min(9.5, (w - 10) / (title.length * 0.58)))}
+        fontSize={Math.max(6.4, Math.min(9.5, (w - 12) / (title.length * 0.75)))}
         fontWeight={700}
         fill={C.ink}
       >
@@ -899,7 +899,7 @@ export function SldSvg({
             >
               DC IN
             </text>
-            <text x={xInv + wInv + 6} y={dcY - 30} fontFamily={F} fontSize={7.6} fill={C.ac}>
+            <text x={xInv + wInv + 6} y={dcY - 44} fontFamily={F} fontSize={7.6} fill={C.ac}>
               GRID OUT
             </text>
             {bat && (
@@ -1199,7 +1199,7 @@ export function SldSvg({
             <line x1={xInv + wInv} y1={dcY} x2={xAc} y2={dcY} stroke={C.ac} strokeWidth={2} />
             <WireTag x={(xInv + wInv + xAc) / 2} y={dcY - 22} text="W4" color={C.ac} />
             <VoltageDropBadge x={(xInv + wInv + xAc) / 2} y={dcY + 28} calc={calc("W4")} />
-            <PhaseMark x={(xInv + wInv + xAc) / 2} y={dcY} phase3={phase3} />
+            <PhaseMark x={(xInv + wInv + xAc) / 2 - 34} y={dcY} phase3={phase3} />
             <Node x={xAc} y={dcY} color={C.ac} />
             <Block
               x={xAc}
@@ -1222,9 +1222,10 @@ export function SldSvg({
               real={real}
             />
 
-            <BreakerSymbol x={xAc + wAc - 24} y={dcY} />
-            <SpdSymbol x={xAc + 22} y={dcY + 26} />
-            <RcdSymbol x={xAc + wAc - 24} y={dcY - 34} color={C.ac} />
+            {/* الرموز تُرسم على الموصلات خارج الصندوق حتى لا تحجب أسطر المواصفات */}
+            <BreakerSymbol x={xAc + wAc + 22} y={dcY} />
+            <SpdSymbol x={xAc + 22} y={acBoxY + acBoxH + 16} />
+            <RcdSymbol x={xAc - 34} y={dcY} color={C.ac} />
           </>
         )}
 
@@ -1551,7 +1552,7 @@ export function SldSvg({
                     />
                     <Node x={riser} y={commY + 16} color={C.comm} />
                     <WireTag
-                      x={(xOut - 62 + riser) / 2}
+                      x={(xOut - 62 + riser) / 2 + 60}
                       y={commY + 11}
                       text="C2 — METER RS485 (Modbus)"
                       color={C.comm}

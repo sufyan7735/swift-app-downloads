@@ -1061,7 +1061,7 @@ export const PRODUCTS: Product[] = [
     ],
     certificates: "IEC62619، IEC62477، CE EMC، UN38.3",
     image: optimusL260Image.url,
-    files: [{ kind: "Datasheet", label: "الكتالوج / Datasheet الرسمي", url: optimusL260Catalog.url }],
+    files: [],
   },
   {
     id: "hithium-heroee-legend-112s",
@@ -1098,7 +1098,7 @@ export const PRODUCTS: Product[] = [
     ],
     certificates: "UN38.3، IEC62619، CE",
     image: legend112sImage.url,
-    files: [{ kind: "Datasheet", label: "الكتالوج / Datasheet الرسمي", url: legend112sCatalog.url }],
+    files: [],
   },
 ];
 

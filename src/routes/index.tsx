@@ -1450,15 +1450,15 @@ function PartnersStrip() {
           <ChevronLeft className="size-4" />
         </button>
 
-        <div ref={trackRef} className="min-w-0 flex-1 overflow-x-auto scrollbar-none">
-          <div className="relative mx-auto w-fit">
+        <div ref={trackRef} className="min-w-0 flex-1 px-1 py-1">
+          <div className="relative w-full">
             <img
               src={partnersStrip}
               alt="وكلاء ACTES: Li Power، PYLONTECH، SUNTECH، HTHIUM، sunways"
               loading="eager"
               decoding="sync"
               fetchPriority="high"
-              className="block h-12 w-auto max-w-none sm:h-14 lg:h-11"
+              className="block h-auto w-full"
             />
             {PARTNER_LINKS.map((p) => (
               <a

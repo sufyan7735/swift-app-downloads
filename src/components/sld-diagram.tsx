@@ -35,7 +35,7 @@ import {
 import { downloadSldSheet } from "@/lib/sld-pdf";
 import { downloadSldDxf } from "@/lib/sld-dxf";
 import { mpptMap, mpptMapByInverter } from "@/lib/sld-mppt";
-import { EquipArt, PvRealSymbol, type EquipKind } from "@/components/sld-equipment";
+import { EquipArt, EquipDefs, PvRealSymbol, type EquipKind } from "@/components/sld-equipment";
 import { Button } from "@/components/ui/button";
 import {
   Select,

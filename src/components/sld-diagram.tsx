@@ -403,7 +403,7 @@ function Block({
         y={y + 12}
         textAnchor="middle"
         fontFamily={F}
-        fontSize={Math.max(6.4, Math.min(9.5, (w - 12) / (title.length * 0.75)))}
+        fontSize={Math.max(6.4, Math.min(9.5, (w - 12) / (title.length * 0.85)))}
         fontWeight={700}
         fill={C.ink}
       >
@@ -1198,7 +1198,7 @@ export function SldSvg({
           <>
             <line x1={xInv + wInv} y1={dcY} x2={xAc} y2={dcY} stroke={C.ac} strokeWidth={2} />
             <WireTag x={(xInv + wInv + xAc) / 2} y={dcY - 22} text="W4" color={C.ac} />
-            <VoltageDropBadge x={(xInv + wInv + xAc) / 2} y={dcY + 28} calc={calc("W4")} />
+            <VoltageDropBadge x={(xInv + wInv + xAc) / 2} y={dcY + 38} calc={calc("W4")} />
             <PhaseMark x={(xInv + wInv + xAc) / 2 - 34} y={dcY} phase3={phase3} />
             <Node x={xAc} y={dcY} color={C.ac} />
             <Block

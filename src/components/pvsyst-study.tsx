@@ -928,7 +928,7 @@ export default function PvsystStudy({ study, actions }: Props) {
       </div>
 
       {actions && (
-        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <button
             type="button"
             onClick={actions.onBuy}
@@ -939,19 +939,11 @@ export default function PvsystStudy({ study, actions }: Props) {
           </button>
           <button
             type="button"
-            onClick={actions.onBackToQuote}
-            className="flex items-center justify-center gap-2 rounded-full bg-brand px-4 py-3 text-sm font-black text-brand-foreground shadow-sm ring-1 ring-black/5 transition hover:opacity-90"
+            onClick={actions.onSales}
+            className="flex items-center justify-center gap-2 rounded-full border border-border bg-card px-4 py-3 text-sm font-black text-foreground shadow-sm transition hover:border-brand hover:text-brand"
           >
-            <ArrowLeft className="size-4" />
-            العودة لعرض السعر
-          </button>
-          <button
-            type="button"
-            onClick={actions.onSld}
-            className="flex items-center justify-center gap-2 rounded-full bg-field px-4 py-3 text-sm font-black text-field-foreground shadow-sm ring-1 ring-black/5 transition hover:opacity-90"
-          >
-            <Network className="size-4" />
-            مخطط SLD
+            <Headphones className="size-4 text-brand" />
+            التواصل مع المبيعات
           </button>
         </div>
       )}

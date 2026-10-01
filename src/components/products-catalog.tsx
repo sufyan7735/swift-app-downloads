@@ -290,8 +290,8 @@ function BrandBadge({ brand, large = false }: { brand: string; large?: boolean }
       <span className={`flex items-center rounded-md border border-border/70 bg-card/90 font-black tracking-wide text-navy shadow-sm backdrop-blur ${large ? "h-9 px-3 text-base" : "h-6 px-2 text-[11px]"}`}>
         {logo ? <img src={logo} alt={brandLabel(brand)} className={large ? "h-6 w-auto max-w-32" : "h-4 w-auto max-w-20"} /> : brandLabel(brand)}
       </span>
-      <span className={`ms-1 flex items-center rounded-full border border-border/60 bg-card shadow-lg ${large ? "px-2 py-1" : "px-1.5 py-0.5"}`}>
-        <img src="/brand/actes-logo.png" alt="ACTES" className={large ? "h-5 w-auto" : "h-3 w-auto"} />
+      <span className={`ms-1 flex items-center rounded-lg border border-border/60 bg-card shadow-lg ${large ? "px-2 py-1" : "px-1.5 py-0.5"}`}>
+        <img src="/brand/actes-logo-full.png" alt="ACTES" className={large ? "h-9 w-auto" : "h-5 w-auto"} />
       </span>
     </span>
   );

@@ -633,11 +633,7 @@ export function SldSvg({
   const powerOutX = xInv + wInv;
   const backup = Boolean(bat && inv);
   // مسار EPS يمرّ أسفل مجموعة الإنفرترات ولوحة الـ AC حتى لا يعبر الصناديق
-  const loadY = backup
-    ? Math.max(dcY + 86, invY + invH + 40)
-    : m.grid
-      ? dcY + 34
-      : dcY;
+  const loadY = backup ? Math.max(dcY + 86, invY + invH + 40) : m.grid ? dcY + 34 : dcY;
   /** صندوق لوحة الـ AC بارتفاع ثابت متوسّط المحور عند تعدد الإنفرترات. */
   const acBoxH = multiInv ? 150 : invH + 12;
   const acBoxY = multiInv ? dcY - acBoxH / 2 : invY - 6;

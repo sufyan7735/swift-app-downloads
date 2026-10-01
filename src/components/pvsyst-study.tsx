@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import {
   ArrowLeft,
-  BadgeDollarSign,
   Boxes,
   CloudSun,
   Compass,
@@ -82,7 +81,7 @@ const C = { blue: "#1c3f94", sun: "#f5a01e", violet: "#7b3fa0", red: "#c0392b", 
 
 type Props = {
   study: NonNullable<View["study"]>;
-  actions?: { onBuy: () => void; onBackToQuote: () => void; onSld: () => void; onEco?: () => void };
+  actions?: { onBuy: () => void; onBackToQuote: () => void; onSld: () => void };
 };
 
 /** شاشة دراسة PVsyst — بنفس تصميم ومحتوى تقرير PVsyst V8.1.2 الرسمي. */
@@ -353,16 +352,6 @@ export default function PvsystStudy({ study, actions }: Props) {
             >
               <Languages className="size-3.5" />
               {arTerms ? "الرموز الهندسية" : "التسميات العربية"}
-            </button>
-          )}
-          {actions?.onEco && (
-            <button
-              type="button"
-              onClick={actions.onEco}
-              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-bold text-white shadow-sm transition hover:opacity-90"
-            >
-              <BadgeDollarSign className="size-3.5" />
-              الجدوى الاقتصادية
             </button>
           )}
         </div>
@@ -915,25 +904,6 @@ export default function PvsystStudy({ study, actions }: Props) {
         </p>
       )}
 
-      {/* بطاقة الانتقال إلى الجدوى الاقتصادية */}
-      {actions?.onEco && (
-        <button
-          type="button"
-          onClick={actions.onEco}
-          className="mt-3 flex w-full items-center gap-3 rounded-xl bg-emerald-600 px-4 py-3 text-right text-white shadow-sm ring-1 ring-black/5 transition hover:opacity-90"
-        >
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/20">
-            <BadgeDollarSign className="size-5" />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-sm font-black">عرض الجدوى الاقتصادية والوفر المالي</span>
-            <span className="block text-[11px] text-white/85">
-              الاسترداد، العائد على الاستثمار، والوفر البيئي
-            </span>
-          </span>
-          <ArrowLeft className="size-4 shrink-0" />
-        </button>
-      )}
 
       <div className="mt-4 flex flex-wrap gap-2">
         <button

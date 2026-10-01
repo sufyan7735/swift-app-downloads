@@ -348,6 +348,40 @@ function Block({
 }) {
   const clickable = Boolean(id && pick);
   const showArt = Boolean(real && art);
+  // الوضع الفوتوغرافي: مجسم المعدة فقط، بلا صندوق CAD ولا أسطر مواصفات.
+  if (showArt) {
+    return (
+      <g
+        style={clickable ? { cursor: "pointer" } : undefined}
+        onClick={clickable ? () => pick!(id!) : undefined}
+      >
+        {active && (
+          <rect
+            x={x - 6}
+            y={y - 6}
+            width={w + 12}
+            height={h + 12}
+            fill="none"
+            stroke={accent}
+            strokeWidth={2.2}
+            strokeDasharray="6 4"
+          />
+        )}
+        <EquipArt kind={art!} x={x} y={y} w={w} h={h - 14} accent={accent} />
+        <text
+          x={x + w / 2}
+          y={y + h + 2}
+          textAnchor="middle"
+          fontFamily={F}
+          fontSize={9}
+          fontWeight={700}
+          fill={C.ink}
+        >
+          {title}
+        </text>
+      </g>
+    );
+  }
   return (
     <g
       style={clickable ? { cursor: "pointer" } : undefined}
@@ -362,7 +396,6 @@ function Block({
         stroke={active ? accent : C.frame}
         strokeWidth={active ? 2.8 : 1.6}
       />
-      {showArt && <EquipArt kind={art!} x={x} y={y + 16} w={w} h={h - 16} accent={accent} />}
       <rect x={x} y={y} width={w} height={16} fill={C.band} stroke={C.frame} strokeWidth={1.2} />
       <rect x={x} y={y} width={3} height={h} fill={accent} />
       <text
@@ -376,16 +409,6 @@ function Block({
       >
         {title}
       </text>
-      {showArt && lines.length > 0 && (
-        <rect
-          x={x + 3}
-          y={y + 19}
-          width={w - 6}
-          height={lines.length * 12 + 4}
-          fill={C.fill}
-          opacity={0.82}
-        />
-      )}
       {lines.map((l, i) => (
         <text key={i} x={x + 6} y={y + 30 + i * 12} fontFamily={F} fontSize={8.6} fill={C.ink}>
           {l}

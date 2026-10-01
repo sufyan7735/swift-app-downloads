@@ -28,3 +28,9 @@
 - Except for solar panels, every showroom product must sit on the standard white podium at its catalog-documented physical proportions; regenerate video from the corrected still so scale remains consistent.
 
 - SLD cable-size edits are local presentation overrides passed into calculation helpers; the quote-derived system model remains immutable so exports and inspection share one recalculated result.
+
+- The Windows desktop build uses `vite.electron.config.ts` (nitro `node-server` preset into `dist-electron`) and `electron/main.cjs`, which boots that server on a local port inside the app — keeps the full TanStack server functions working offline.
+
+- All runtime media must resolve to local paths (`/videos`, `/media`, `/catalogs`, `/fonts`, `/brand`); never reference `/__l5e/` CDN URLs or remote hosts in app code, so the desktop app works with no internet.
+
+- Repository files must stay under 10 MB: videos above that live split in `public/videos/parts/` and are reassembled by `src/lib/video-source.ts`.

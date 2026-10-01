@@ -1135,13 +1135,16 @@ export function SldSvg({
             const boxX = xInv - 128;
             const bankX = xInv - 336;
             const bankW = 184;
+            // في الوضع الواقعي: الخزانة البرجية رأسية والجدارية أعرض قليلاً.
+            const bankH = real ? (batArt === "battery-rack" ? 142 : 84) : 66;
+            const artW = real ? (batArt === "battery-rack" ? 112 : 150) : bankW;
             return (
               <g opacity={opBat}>
                 <Block
-                  x={bankX}
-                  y={batY - 30}
-                  w={bankW}
-                  h={66}
+                  x={bankX + bankW - artW}
+                  y={batY - bankH / 2 + 3}
+                  w={artW}
+                  h={bankH}
                   title="BATTERY BANK"
                   lines={[
                     `${bat.qty} × ${bat.kwh} kWh = ${bat.totalKwh} kWh`,
@@ -1156,7 +1159,13 @@ export function SldSvg({
                   real={real}
                 />
                 <BatterySymbol x={bankX + bankW + 14} y={batY} />
-                <text x={bankX} y={batY + 50} fontFamily={F} fontSize={8} fill={C.soft}>
+                <text
+                  x={bankX + bankW - artW}
+                  y={real ? batY + (bankH * 1.3) / 2 + 42 : batY + 50}
+                  fontFamily={F}
+                  fontSize={8}
+                  fill={C.soft}
+                >
                   {bat.model}
                 </text>
                 <line

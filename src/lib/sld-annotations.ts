@@ -14,6 +14,30 @@ const ROUTE_LENGTH = DEFAULT_ROUTE_LENGTH;
 /** أطوال فعلية يدخلها المهندس يدوياً لكل مسار (اختيارية). */
 export type CableLengths = Record<string, number>;
 
+/** مقاطع يختارها المهندس محلياً لكل مسار قدرة (mm²). */
+export type CableAreas = Record<string, number>;
+
+export type CableSizeOption = { area: number; awg: string };
+
+/** مقاسات النحاس القياسية مع أقرب مكافئ AWG متداول. */
+export const CABLE_SIZE_OPTIONS: CableSizeOption[] = [
+  { area: 2.5, awg: "12 AWG" },
+  { area: 4, awg: "10 AWG" },
+  { area: 6, awg: "9 AWG" },
+  { area: 10, awg: "8 AWG" },
+  { area: 16, awg: "6 AWG" },
+  { area: 25, awg: "4 AWG" },
+  { area: 35, awg: "2 AWG" },
+  { area: 50, awg: "1/0 AWG" },
+  { area: 70, awg: "2/0 AWG" },
+  { area: 95, awg: "4/0 AWG" },
+  { area: 120, awg: "250 kcmil" },
+  { area: 150, awg: "300 kcmil" },
+  { area: 185, awg: "350 kcmil" },
+  { area: 240, awg: "500 kcmil" },
+  { area: 300, awg: "600 kcmil" },
+];
+
 /** الطول الافتراضي لمسار ما قبل أي تعديل يدوي. */
 export function defaultLengthOf(tag: string): number {
   return DEFAULT_ROUTE_LENGTH[tag] ?? 15;
@@ -30,7 +54,11 @@ export type CableCalc = {
   length: number;
   /** الطول معدَّل يدوياً من المهندس بدل الطول التصميمي النمطي. */
   custom: boolean;
+  /** المقطع معدَّل يدوياً من المهندس بدل الاختيار التصميمي. */
+  customArea: boolean;
+  awg: string | null;
   dropPct: number | null;
+  dropStatus: "ok" | "warning" | "na";
   kA: number | null;
 };
 
@@ -38,6 +66,27 @@ export type CableCalc = {
 function areaOf(spec: string): number | null {
   const m = /([\d.]+)\s*mm²/.exec(spec);
   return m ? Number(m[1]) : null;
+}
+
+/** أقرب توصيف AWG لمقطع متري، للعرض فقط دون تغيير معادلات IEC. */
+export function awgForArea(area: number | null): string | null {
+  if (!area) return null;
+  return CABLE_SIZE_OPTIONS.reduce((best, option) =>
+    Math.abs(option.area - area) < Math.abs(best.area - area) ? option : best,
+  ).awg;
+}
+
+/** بدائل منطقية حول المقاس التصميمي مع إبقاء كامل المجال الهندسي متاحاً. */
+export function cableSizeOptions(area: number | null): CableSizeOption[] {
+  if (!area) return [];
+  const baseline = CABLE_SIZE_OPTIONS.findIndex((option) => option.area >= area);
+  const from = Math.max(0, (baseline < 0 ? CABLE_SIZE_OPTIONS.length - 1 : baseline) - 2);
+  return CABLE_SIZE_OPTIONS.slice(from);
+}
+
+/** يحدّث أول مقطع ظاهر في وصف الكابل مع الحفاظ على تكوين وعدد الموصلات. */
+function specWithArea(spec: string, area: number): string {
+  return spec.replace(/([\d.]+)(\s*mm²)/, `${area}$2`);
 }
 
 /** التيار المذكور بين قوسين في وصف الكابل. */
@@ -55,12 +104,16 @@ function breakingKa(kind: SldCable["kind"], phase3: boolean, amps: number | null
 }
 
 /** هبوط الجهد ونسبته لكل كابل في المنظومة. */
-export function cableCalcs(m: SldModel, lengths?: CableLengths | undefined): CableCalc[] {
+export function cableCalcs(m: SldModel, lengths?: CableLengths | undefined, areas?: CableAreas | undefined): CableCalc[] {
   const phase3 = Boolean(m.inverter?.phase3 || m.acBox?.phase3);
   const acVolts = phase3 ? 400 : 230;
 
   return m.cables.map((c) => {
-    const area = areaOf(c.spec);
+    const originalArea = areaOf(c.spec);
+    const manualArea = areas?.[c.tag];
+    const customArea = typeof manualArea === "number" && Number.isFinite(manualArea) && manualArea > 0;
+    const area = customArea ? manualArea : originalArea;
+    const spec = area && customArea ? specWithArea(c.spec, area) : c.spec;
     let current = currentOf(c.spec);
     let volts: number | null = null;
 
@@ -90,14 +143,17 @@ export function cableCalcs(m: SldModel, lengths?: CableLengths | undefined): Cab
     return {
       tag: c.tag,
       route: c.route,
-      spec: c.spec,
+      spec,
       kind: c.kind,
       area,
       current: current ?? null,
       volts,
       length,
       custom,
+      customArea,
+      awg: awgForArea(area),
       dropPct,
+      dropStatus: dropPct === null ? "na" : dropPct <= 3 ? "ok" : "warning",
       kA: breakingKa(c.kind, phase3, current ?? null),
     };
   });
@@ -106,9 +162,9 @@ export function cableCalcs(m: SldModel, lengths?: CableLengths | undefined): Cab
 export type InspectItem = { id: string; title: string; subtitle: string; rows: [string, string][] };
 
 /** بطاقات فحص المكوّنات الهندسية القابلة للنقر على المخطط. */
-export function inspectorItems(m: SldModel, lengths?: CableLengths | undefined): Record<string, InspectItem> {
+export function inspectorItems(m: SldModel, lengths?: CableLengths | undefined, areas?: CableAreas | undefined): Record<string, InspectItem> {
   const out: Record<string, InspectItem> = {};
-  const calcs = cableCalcs(m, lengths);
+  const calcs = cableCalcs(m, lengths, areas);
   const byTag = (t: string) => calcs.find((c) => c.tag === t);
   const phase3 = Boolean(m.inverter?.phase3 || m.acBox?.phase3);
 

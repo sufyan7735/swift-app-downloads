@@ -26,3 +26,5 @@
 - Preserve all product videos at their original 1080p quality without compression or transcoding; the planned installed app bundles the complete media set because customers must install and use it offline.
 
 - Except for solar panels, every showroom product must sit on the standard white podium at its catalog-documented physical proportions; regenerate video from the corrected still so scale remains consistent.
+
+- SLD cable-size edits are local presentation overrides passed into calculation helpers; the quote-derived system model remains immutable so exports and inspection share one recalculated result.

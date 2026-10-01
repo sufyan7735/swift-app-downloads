@@ -28,8 +28,6 @@ import {
   Building2,
   Check,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   CircleDollarSign,
   Download,
   FileCheck2,
@@ -1431,34 +1429,22 @@ const PARTNER_LINKS = [
 
 function PartnersStrip() {
   const trackRef = useRef<HTMLDivElement>(null);
-  const scrollBy = (dir: number) => {
-    const el = trackRef.current;
-    if (el) el.scrollBy({ left: dir * Math.max(160, el.clientWidth * 0.6), behavior: "smooth" });
-  };
   return (
     <section
       aria-label="وكلاء وشركاء ACTES"
       className="shrink-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
     >
       <div className="flex items-stretch">
-        <button
-          type="button"
-          onClick={() => scrollBy(-1)}
-          aria-label="الوكلاء السابقون"
-          className="grid w-10 shrink-0 place-items-center border-l border-border/70 text-navy/60 transition hover:bg-muted hover:text-navy"
-        >
-          <ChevronLeft className="size-4" />
-        </button>
 
-        <div ref={trackRef} className="min-w-0 flex-1 overflow-x-auto scrollbar-none">
-          <div className="relative mx-auto w-fit">
+        <div ref={trackRef} className="min-w-0 flex-1 px-1 py-1">
+          <div className="relative w-full">
             <img
               src={partnersStrip}
               alt="وكلاء ACTES: Li Power، PYLONTECH، SUNTECH، HTHIUM، sunways"
               loading="eager"
               decoding="sync"
               fetchPriority="high"
-              className="block h-12 w-auto max-w-none sm:h-14 lg:h-11"
+              className="block h-auto w-full"
             />
             {PARTNER_LINKS.map((p) => (
               <a
@@ -1475,14 +1461,6 @@ function PartnersStrip() {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => scrollBy(1)}
-          aria-label="الوكلاء التاليون"
-          className="grid w-10 shrink-0 place-items-center border-r border-border/70 text-navy/60 transition hover:bg-muted hover:text-navy"
-        >
-          <ChevronRight className="size-4" />
-        </button>
       </div>
     </section>
   );

@@ -11,20 +11,13 @@
 
 ## Project rules
 
-- READ `HANDOFF.md` at the repo root before any work — it carries the full project context, what is done, and what "أكمل" (continue) means. If the user says "أكمل", continue the remaining product videos listed there, 3 per batch.
-
-- Web fonts are self-hosted in `public/fonts/` and loaded via `/fonts/fonts.css` in `src/routes/__root.tsx` — no external font requests.
-
-- Product catalog data lives in src/lib/products-data.ts and renders via src/components/products-catalog.tsx as an in-app view (no bot/quote workflow) — keeps the info-only catalog isolated from sales flows.
-
-- Product intro videos are real `<video>` files registered in src/lib/product-video.ts and played by src/components/product-video.tsx — never substitute slideshows or CSS-animated stills.
-
-- Product specs, compatibility and images come only from the bundled catalogs or the manufacturer's official sources — never guess, never reuse a similar model's image.
-
-- The products catalog is information-only: no pricing, ordering, sales or quote flows may be linked into it.
-
-- Preserve all product videos at their original 1080p quality without compression or transcoding; the planned installed app bundles the complete media set because customers must install and use it offline.
-
-- Except for solar panels, every showroom product must sit on the standard white podium at its catalog-documented physical proportions; regenerate video from the corrected still so scale remains consistent.
-
-- SLD cable-size edits are local presentation overrides passed into calculation helpers; the quote-derived system model remains immutable so exports and inspection share one recalculated result.
+- READ `HANDOFF.md` first; "أكمل" = continue its remaining product videos, 3 per batch.
+- Fonts are self-hosted in `public/fonts/` via `/fonts/fonts.css` in `src/routes/__root.tsx` — no external font requests.
+- All runtime media resolves to local paths (`/videos`, `/media`, `/catalogs`, `/fonts`, `/brand`) — never `/__l5e/` CDN or remote hosts, so the desktop app runs offline.
+- Repo files stay under 10 MB: bigger videos live split in `public/videos/parts/`, reassembled by `src/lib/video-source.ts`; keep original 1080p quality, never transcode.
+- Windows desktop build: `vite.electron.config.ts` (nitro `node-server` → `dist-electron`) + `electron/main.cjs` boots that server on a local port, so server functions work offline.
+- Products catalog (`src/lib/products-data.ts` + `src/components/products-catalog.tsx`) is information-only: no pricing, ordering or quote flows linked into it.
+- Product intro videos are real `<video>` files in `src/lib/product-video.ts`, played by `src/components/product-video.tsx` — never slideshows or CSS-animated stills.
+- Specs, compatibility and images come only from bundled catalogs or the manufacturer's official sources — never guess or reuse a similar model's image.
+- Except solar panels, every showroom product sits on the standard white podium at catalog-documented proportions; regenerate video from the corrected still.
+- SLD cable-size edits are presentation-only overrides passed into calculation helpers; the quote-derived system model stays immutable.

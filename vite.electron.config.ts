@@ -1,17 +1,28 @@
-// إعداد بناء مخصّص لنسخة سطح المكتب (ويندوز) عبر Electron.
-// يبني خادم Node محليًا داخل التطبيق (nitro preset: node-server) بدل هدف السحابة،
+// إعداد بناء نسخة سطح المكتب (ويندوز) — Electron.
+// يبني خادمًا محليًا يعمل داخل التطبيق نفسه (Node) بدل هدف السحابة،
 // فيعمل التطبيق بالكامل من ملفاته المحلية دون إنترنت.
-import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import tailwindcss from "@tailwindcss/vite";
+import viteReact from "@vitejs/plugin-react";
+import { nitro } from "nitro/vite";
+import { defineConfig } from "vite";
+import tsConfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  tanstackStart: {
-    server: { entry: "server" },
+  build: { outDir: "dist-electron" },
+  resolve: {
+    dedupe: ["react", "react-dom", "@tanstack/react-router", "@tanstack/react-start"],
   },
-  nitro: {
-    preset: "node-server",
-    output: {
-      dir: ".output-electron",
-    },
-  },
-  buildExitWatchdog: { graceMs: 120000 },
+  plugins: [
+    tsConfigPaths({ projects: ["./tsconfig.json"] }),
+    tailwindcss(),
+    tanstackStart({ server: { entry: "server" } }),
+    viteReact(),
+    nitro({
+      config: {
+        preset: "node-server",
+        output: { dir: "dist-electron" },
+      },
+    }),
+  ],
 });

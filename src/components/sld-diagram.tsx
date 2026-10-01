@@ -1097,7 +1097,7 @@ export function SldSvg({
                 {invCount > drawnInv && (
                   <text
                     x={xInv}
-                    y={invY + stackH + 40}
+                    y={invY + stackH + (real ? 72 : 40)}
                     textAnchor="start"
                     fontFamily={F}
                     fontSize={7.6}

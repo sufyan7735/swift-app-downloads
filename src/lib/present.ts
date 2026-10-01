@@ -26,6 +26,8 @@ export type View = {
     total: number;
     fileName: string;
     fileUrl?: string | undefined;
+    /** طلب صنف محدد: أصناف يختارها العميل بنفسه — لا تُبنى لها بدائل هندسية */
+    itemOrder: boolean;
   } | null;
   study: {
     number: string;
@@ -211,6 +213,7 @@ export function buildView(r: BotResult, step: string): View {
       total,
       fileName: String(r.quote_file_name || `عرض سعر ${r.quote_number || "ACTES"}.pdf`),
       fileUrl: r.quote_file_url || undefined,
+      itemOrder: Boolean(r['item_quote']),
     };
   }
 

@@ -107,9 +107,8 @@ export type SldTheme = keyof typeof THEMES;
 const F = "'Segoe UI', 'Tahoma', sans-serif";
 
 type SldActions = {
-  onBackToQuote: () => void;
   onBuy: () => void;
-  onStudy?: (() => void) | undefined;
+  onSales: () => void;
 };
 type Props = {
   params: Record<string, unknown> | null;

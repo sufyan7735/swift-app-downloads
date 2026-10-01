@@ -1075,13 +1075,7 @@ export function SldSvg({
                   </text>
                 )}
                 {bat && (
-                  <text
-                    x={xInv + wInv + 24}
-                    y={dcY + 56}
-                    fontFamily={F}
-                    fontSize={7.6}
-                    fill={C.ac}
-                  >
+                  <text x={xInv + wInv + 24} y={dcY + 56} fontFamily={F} fontSize={7.6} fill={C.ac}>
                     EPS / BACKUP
                   </text>
                 )}

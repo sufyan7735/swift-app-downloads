@@ -267,11 +267,28 @@ function brandLabel(b: string) {
   return b;
 }
 
+// شعارات المصنّعين مستخرجة من الكتالوجات الرسمية في public/catalogs.
+const MAKER_LOGOS: Record<string, string> = {
+  Deye: "/brand/makers/deye.png",
+  Solis: "/brand/makers/solis.png",
+  "Li-Power": "/brand/makers/lipower.png",
+  Pylontech: "/brand/makers/pylontech.png",
+  HiTHIUM: "/brand/makers/hithium.png",
+  Suntech: "/brand/makers/suntech.png",
+};
+
+function makerLogo(b: string) {
+  const l = brandLabel(b);
+  const k = Object.keys(MAKER_LOGOS).find((n) => n.toLowerCase().replace(/[^a-z]/g, "") === l.toLowerCase().replace(/[^a-z]/g, ""));
+  return k ? MAKER_LOGOS[k] : undefined;
+}
+
 function BrandBadge({ brand, large = false }: { brand: string; large?: boolean }) {
+  const logo = makerLogo(brand);
   return (
     <span dir="ltr" className="pointer-events-none absolute left-2 top-2 z-10 flex flex-col items-start gap-1">
-      <span className={`rounded-md border border-border/70 bg-card/90 font-black tracking-wide text-navy shadow-sm backdrop-blur ${large ? "px-3 py-1.5 text-base" : "px-2 py-1 text-[11px]"}`}>
-        {brandLabel(brand)}
+      <span className={`flex items-center rounded-md border border-border/70 bg-card/90 font-black tracking-wide text-navy shadow-sm backdrop-blur ${large ? "h-9 px-3 text-base" : "h-6 px-2 text-[11px]"}`}>
+        {logo ? <img src={logo} alt={brandLabel(brand)} className={large ? "h-6 w-auto max-w-32" : "h-4 w-auto max-w-20"} /> : brandLabel(brand)}
       </span>
       <span className={`ms-1 flex items-center rounded-full border border-border/60 bg-card shadow-lg ${large ? "px-2 py-1" : "px-1.5 py-0.5"}`}>
         <img src="/brand/actes-logo.png" alt="ACTES" className={large ? "h-5 w-auto" : "h-3 w-auto"} />

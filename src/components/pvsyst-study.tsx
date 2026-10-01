@@ -82,7 +82,7 @@ const C = { blue: "#1c3f94", sun: "#f5a01e", violet: "#7b3fa0", red: "#c0392b", 
 
 type Props = {
   study: NonNullable<View["study"]>;
-  actions?: { onBuy: () => void; onBackToQuote: () => void; onSld: () => void };
+  actions?: { onBuy: () => void; onSales: () => void };
 };
 
 /** شاشة دراسة PVsyst — بنفس تصميم ومحتوى تقرير PVsyst V8.1.2 الرسمي. */

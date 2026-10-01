@@ -1044,9 +1044,9 @@ export function SldSvg({
                   );
                 })}
                 <text
-                  x={xInv + wInv / 2}
+                  x={xInv}
                   y={invY + stackH + 24}
-                  textAnchor="middle"
+                  textAnchor="start"
                   fontFamily={F}
                   fontSize={8}
                   fill={C.soft}
@@ -1055,9 +1055,9 @@ export function SldSvg({
                 </text>
                 {invCount > drawnInv && (
                   <text
-                    x={xInv + wInv / 2}
+                    x={xInv}
                     y={invY + stackH + 40}
-                    textAnchor="middle"
+                    textAnchor="start"
                     fontFamily={F}
                     fontSize={7.6}
                     fontStyle="italic"
@@ -1188,7 +1188,7 @@ export function SldSvg({
                 <VoltageDropBadge x={riser - 70} y={batY + 50} calc={calc("W3")} />
                 <text
                   x={riser + 8}
-                  y={(invY + invH + batY) / 2}
+                  y={batY - 44}
                   fontFamily={F}
                   fontSize={7.6}
                   fill={C.dc}

@@ -20,14 +20,7 @@ const C = {
 const F = "'Segoe UI', 'Tahoma', sans-serif";
 
 export type EquipKind =
-  | "inverter"
-  | "battery-rack"
-  | "battery-wall"
-  | "board-dc"
-  | "board-ac"
-  | "ats"
-  | "grid"
-  | "loads";
+  "inverter" | "battery-rack" | "battery-wall" | "board-dc" | "board-ac" | "ats" | "grid" | "loads";
 
 type Box = { x: number; y: number; w: number; h: number; accent: string };
 
@@ -62,7 +55,16 @@ function Fins({ x, y, h, n, w = 10 }: { x: number; y: number; h: number; n: numb
   const gap = h / n;
   return (
     <g>
-      <rect x={x} y={y} width={w} height={h} rx={2} fill="url(#eqMetal)" stroke={C.frame} strokeWidth={0.8} />
+      <rect
+        x={x}
+        y={y}
+        width={w}
+        height={h}
+        rx={2}
+        fill="url(#eqMetal)"
+        stroke={C.frame}
+        strokeWidth={0.8}
+      />
       {Array.from({ length: n }).map((_, i) => (
         <line
           key={i}
@@ -85,9 +87,33 @@ function Glands({ x, y, n, gap = 16 }: { x: number; y: number; n: number; gap?: 
     <g>
       {Array.from({ length: n }).map((_, i) => (
         <g key={i}>
-          <rect x={x + i * gap} y={y} width={9} height={6} rx={1.6} fill={C.band} stroke={C.frame} strokeWidth={0.9} />
-          <rect x={x + i * gap + 2} y={y + 5.4} width={5} height={3} rx={1} fill={C.soft} opacity={0.75} />
-          <line x1={x + i * gap + 4.5} y1={y + 8} x2={x + i * gap + 4.5} y2={y + 13} stroke={C.soft} strokeWidth={1.1} />
+          <rect
+            x={x + i * gap}
+            y={y}
+            width={9}
+            height={6}
+            rx={1.6}
+            fill={C.band}
+            stroke={C.frame}
+            strokeWidth={0.9}
+          />
+          <rect
+            x={x + i * gap + 2}
+            y={y + 5.4}
+            width={5}
+            height={3}
+            rx={1}
+            fill={C.soft}
+            opacity={0.75}
+          />
+          <line
+            x1={x + i * gap + 4.5}
+            y1={y + 8}
+            x2={x + i * gap + 4.5}
+            y2={y + 13}
+            stroke={C.soft}
+            strokeWidth={1.1}
+          />
         </g>
       ))}
     </g>
@@ -98,7 +124,16 @@ function Glands({ x, y, n, gap = 16 }: { x: number; y: number; n: number; gap?: 
 function Nameplate({ x, y, w, label }: { x: number; y: number; w: number; label: string }) {
   return (
     <g>
-      <rect x={x} y={y} width={w} height={11} rx={1.4} fill={C.fill} stroke={C.frame} strokeWidth={0.7} />
+      <rect
+        x={x}
+        y={y}
+        width={w}
+        height={11}
+        rx={1.4}
+        fill={C.fill}
+        stroke={C.frame}
+        strokeWidth={0.7}
+      />
       <text x={x + 3} y={y + 8} fontFamily={F} fontSize={5.6} fontWeight={700} fill={C.soft}>
         {label}
       </text>
@@ -122,15 +157,41 @@ function Nameplate({ x, y, w, label }: { x: number; y: number; w: number; label:
 function Lcd({ x, y, w, h, accent }: Box) {
   return (
     <g>
-      <rect x={x} y={y} width={w} height={h} rx={2.6} fill={C.band} stroke={C.frame} strokeWidth={1.1} />
-      <rect x={x + 2} y={y + 2} width={w - 4} height={h - 4} rx={1.8} fill="url(#eqGlass)" stroke={accent} strokeWidth={0.9} />
+      <rect
+        x={x}
+        y={y}
+        width={w}
+        height={h}
+        rx={2.6}
+        fill={C.band}
+        stroke={C.frame}
+        strokeWidth={1.1}
+      />
+      <rect
+        x={x + 2}
+        y={y + 2}
+        width={w - 4}
+        height={h - 4}
+        rx={1.8}
+        fill="url(#eqGlass)"
+        stroke={accent}
+        strokeWidth={0.9}
+      />
       <text x={x + 5} y={y + 10} fontFamily={F} fontSize={6} fontWeight={700} fill={accent}>
         P 12.4 kW
       </text>
       <text x={x + 5} y={y + 18.5} fontFamily={F} fontSize={5.4} fill={C.soft}>
         V 398 / I 31 A
       </text>
-      <line x1={x + 4} y1={y + h - 5} x2={x + w - 6} y2={y + h - 5} stroke={accent} strokeWidth={0.8} opacity={0.5} />
+      <line
+        x1={x + 4}
+        y1={y + h - 5}
+        x2={x + w - 6}
+        y2={y + h - 5}
+        stroke={accent}
+        strokeWidth={0.8}
+        opacity={0.5}
+      />
     </g>
   );
 }
@@ -143,7 +204,16 @@ function Inverter({ x, y, w, h, accent }: Box) {
   return (
     <g filter="url(#eqShadow)">
       {/* الشاسيه */}
-      <rect x={bx} y={y + 3} width={bw} height={bh} rx={7} fill="url(#eqMetal)" stroke={C.frame} strokeWidth={1.6} />
+      <rect
+        x={bx}
+        y={y + 3}
+        width={bw}
+        height={bh}
+        rx={7}
+        fill="url(#eqMetal)"
+        stroke={C.frame}
+        strokeWidth={1.6}
+      />
       <rect x={bx} y={y + 3} width={bw} height={bh} rx={7} fill="url(#eqSheen)" />
       <Fins x={x + 1} y={y + 10} h={bh - 20} n={9} />
       <Fins x={x + w - 11} y={y + 10} h={bh - 20} n={9} />
@@ -174,7 +244,14 @@ function Inverter({ x, y, w, h, accent }: Box) {
             strokeWidth={0.7}
           />
           <circle cx={bx + bw - 14} cy={y + 14 + i * 11} r={1} fill="#ffffff" opacity={0.65} />
-          <text x={bx + bw - 20} y={y + 17.4 + i * 11} textAnchor="end" fontFamily={F} fontSize={5.6} fill={C.soft}>
+          <text
+            x={bx + bw - 20}
+            y={y + 17.4 + i * 11}
+            textAnchor="end"
+            fontFamily={F}
+            fontSize={5.6}
+            fill={C.soft}
+          >
             {t}
           </text>
         </g>
@@ -182,11 +259,26 @@ function Inverter({ x, y, w, h, accent }: Box) {
       {/* مفتاح عزل DC الدوار */}
       <circle cx={bx + 16} cy={y + bh - 20} r={8} fill={C.fill} stroke={C.dc} strokeWidth={1.6} />
       <circle cx={bx + 16} cy={y + bh - 20} r={4.6} fill={C.band} stroke={C.dc} strokeWidth={1} />
-      <line x1={bx + 16} y1={y + bh - 20} x2={bx + 21.6} y2={y + bh - 25.6} stroke={C.dc} strokeWidth={2} strokeLinecap="round" />
-      <text x={bx + 27} y={y + bh - 24} fontFamily={F} fontSize={5.8} fontWeight={700} fill={C.dc}>
-        DC SWITCH
+      <line
+        x1={bx + 16}
+        y1={y + bh - 20}
+        x2={bx + 21.6}
+        y2={y + bh - 25.6}
+        stroke={C.dc}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+      <text
+        x={bx + 16}
+        y={y + bh - 7}
+        textAnchor="middle"
+        fontFamily={F}
+        fontSize={5}
+        fontWeight={700}
+        fill={C.dc}
+      >
+        DC SW
       </text>
-      <Nameplate x={bx + 27} y={y + bh - 20} w={Math.max(44, bw * 0.42)} label="HYBRID INVERTER" />
       <Glands x={bx + 12} y={y + bh + 1} n={Math.max(3, Math.floor(bw / 28))} />
     </g>
   );
@@ -203,10 +295,28 @@ function BatteryRack({ x, y, w, h, accent }: Box) {
   const mh = avail / mods;
   return (
     <g filter="url(#eqShadow)">
-      <rect x={bx - 5} y={top - 3} width={bw + 10} height={h - 12} rx={4} fill="url(#eqMetal)" stroke={C.frame} strokeWidth={1.6} />
+      <rect
+        x={bx - 5}
+        y={top - 3}
+        width={bw + 10}
+        height={h - 12}
+        rx={4}
+        fill="url(#eqMetal)"
+        stroke={C.frame}
+        strokeWidth={1.6}
+      />
       <rect x={bx - 5} y={top - 3} width={bw + 10} height={h - 12} rx={4} fill="url(#eqSheen)" />
       {/* وحدة التحكم */}
-      <rect x={bx} y={top} width={bw} height={bmsH} rx={2} fill={C.fill} stroke={accent} strokeWidth={1.3} />
+      <rect
+        x={bx}
+        y={top}
+        width={bw}
+        height={bmsH}
+        rx={2}
+        fill={C.fill}
+        stroke={accent}
+        strokeWidth={1.3}
+      />
       <text x={bx + 5} y={top + 11} fontFamily={F} fontSize={6.6} fontWeight={700} fill={accent}>
         BMS CONTROL
       </text>
@@ -217,10 +327,28 @@ function BatteryRack({ x, y, w, h, accent }: Box) {
         const ih = mh - 3;
         return (
           <g key={i}>
-            <rect x={bx} y={my} width={bw} height={ih} rx={2} fill={C.fill} stroke={C.frame} strokeWidth={1} />
+            <rect
+              x={bx}
+              y={my}
+              width={bw}
+              height={ih}
+              rx={2}
+              fill={C.fill}
+              stroke={C.frame}
+              strokeWidth={1}
+            />
             <rect x={bx} y={my} width={bw} height={ih} rx={2} fill="url(#eqSheen)" opacity={0.7} />
             {/* مقبض السحب */}
-            <rect x={bx + 5} y={my + ih / 2 - 2} width={16} height={4} rx={2} fill={C.band} stroke={C.soft} strokeWidth={0.7} />
+            <rect
+              x={bx + 5}
+              y={my + ih / 2 - 2}
+              width={16}
+              height={4}
+              rx={2}
+              fill={C.band}
+              stroke={C.soft}
+              strokeWidth={0.7}
+            />
             {/* شريط حالة الشحن */}
             {Array.from({ length: 4 }).map((_, k) => (
               <rect
@@ -234,16 +362,38 @@ function BatteryRack({ x, y, w, h, accent }: Box) {
                 opacity={k < 3 ? 0.9 : 0.35}
               />
             ))}
-            <text x={bx + bw - 5} y={my + ih / 2 + 2.6} textAnchor="end" fontFamily={F} fontSize={5.8} fill={C.soft}>
+            <text
+              x={bx + bw - 5}
+              y={my + ih / 2 + 2.6}
+              textAnchor="end"
+              fontFamily={F}
+              fontSize={5.8}
+              fill={C.soft}
+            >
               {`MODULE ${i + 1}`}
             </text>
           </g>
         );
       })}
       {/* القاعدة بعجلات */}
-      <rect x={bx - 5} y={y + h - 11} width={bw + 10} height={5} rx={1.4} fill={C.soft} opacity={0.55} />
+      <rect
+        x={bx - 5}
+        y={y + h - 11}
+        width={bw + 10}
+        height={5}
+        rx={1.4}
+        fill={C.soft}
+        opacity={0.55}
+      />
       <circle cx={bx + 4} cy={y + h - 4} r={3} fill={C.band} stroke={C.frame} strokeWidth={0.8} />
-      <circle cx={bx + bw - 4} cy={y + h - 4} r={3} fill={C.band} stroke={C.frame} strokeWidth={0.8} />
+      <circle
+        cx={bx + bw - 4}
+        cy={y + h - 4}
+        r={3}
+        fill={C.band}
+        stroke={C.frame}
+        strokeWidth={0.8}
+      />
     </g>
   );
 }
@@ -255,10 +405,28 @@ function BatteryWall({ x, y, w, h, accent }: Box) {
   const bh = h - 16;
   return (
     <g filter="url(#eqShadow)">
-      <rect x={bx} y={y + 4} width={bw} height={bh} rx={9} fill="url(#eqMetal)" stroke={C.frame} strokeWidth={1.6} />
+      <rect
+        x={bx}
+        y={y + 4}
+        width={bw}
+        height={bh}
+        rx={9}
+        fill="url(#eqMetal)"
+        stroke={C.frame}
+        strokeWidth={1.6}
+      />
       <rect x={bx} y={y + 4} width={bw} height={bh} rx={9} fill="url(#eqSheen)" />
       {/* شريط الشحن */}
-      <rect x={bx + 9} y={y + 12} width={bw - 18} height={11} rx={5.5} fill={C.fill} stroke={C.frame} strokeWidth={1} />
+      <rect
+        x={bx + 9}
+        y={y + 12}
+        width={bw - 18}
+        height={11}
+        rx={5.5}
+        fill={C.fill}
+        stroke={C.frame}
+        strokeWidth={1}
+      />
       {Array.from({ length: 5 }).map((_, i) => (
         <rect
           key={i}
@@ -275,8 +443,25 @@ function BatteryWall({ x, y, w, h, accent }: Box) {
         SOC 82%
       </text>
       {/* قاطع البطارية */}
-      <rect x={bx + bw - 34} y={y + 26} width={25} height={15} rx={2.4} fill={C.fill} stroke={accent} strokeWidth={1.2} />
-      <line x1={bx + bw - 28} y1={y + 38} x2={bx + bw - 15} y2={y + 29} stroke={accent} strokeWidth={1.6} strokeLinecap="round" />
+      <rect
+        x={bx + bw - 34}
+        y={y + 26}
+        width={25}
+        height={15}
+        rx={2.4}
+        fill={C.fill}
+        stroke={accent}
+        strokeWidth={1.2}
+      />
+      <line
+        x1={bx + bw - 28}
+        y1={y + 38}
+        x2={bx + bw - 15}
+        y2={y + 29}
+        stroke={accent}
+        strokeWidth={1.6}
+        strokeLinecap="round"
+      />
       <circle cx={bx + bw - 28} cy={y + 38} r={1.5} fill={accent} />
       <Nameplate x={bx + 9} y={y + bh - 16} w={Math.max(40, bw * 0.5)} label="LFP BATTERY" />
       <Glands x={bx + 14} y={y + bh + 2} n={2} />
@@ -293,20 +478,71 @@ function Board({ x, y, w, h, accent, dc }: Box & { dc: boolean }) {
   const perRail = Math.max(3, Math.floor(bw / 17));
   return (
     <g filter="url(#eqShadow)">
-      <rect x={bx} y={y + 4} width={bw} height={bh} rx={5} fill="url(#eqMetal)" stroke={C.frame} strokeWidth={1.6} />
+      <rect
+        x={bx}
+        y={y + 4}
+        width={bw}
+        height={bh}
+        rx={5}
+        fill="url(#eqMetal)"
+        stroke={C.frame}
+        strokeWidth={1.6}
+      />
       {/* النافذة الشفافة */}
-      <rect x={bx + 5} y={y + 10} width={bw - 10} height={bh - 20} rx={3} fill={C.fill} stroke={accent} strokeWidth={1.2} />
-      <rect x={bx + 5} y={y + 10} width={bw - 10} height={bh - 20} rx={3} fill="url(#eqSheen)" opacity={0.6} />
+      <rect
+        x={bx + 5}
+        y={y + 10}
+        width={bw - 10}
+        height={bh - 20}
+        rx={3}
+        fill={C.fill}
+        stroke={accent}
+        strokeWidth={1.2}
+      />
+      <rect
+        x={bx + 5}
+        y={y + 10}
+        width={bw - 10}
+        height={bh - 20}
+        rx={3}
+        fill="url(#eqSheen)"
+        opacity={0.6}
+      />
       {Array.from({ length: rails }).map((_, r) => {
         const ry = y + 16 + r * ((bh - 26) / rails);
         return (
           <g key={r}>
             {/* سكة DIN */}
-            <rect x={bx + 8} y={ry + 14} width={bw - 16} height={3} rx={1} fill={C.soft} opacity={0.65} />
+            <rect
+              x={bx + 8}
+              y={ry + 14}
+              width={bw - 16}
+              height={3}
+              rx={1}
+              fill={C.soft}
+              opacity={0.65}
+            />
             {Array.from({ length: perRail }).map((_, i) => (
               <g key={i}>
-                <rect x={bx + 9 + i * 14} y={ry} width={10} height={15} rx={1.4} fill={C.band} stroke={C.frame} strokeWidth={0.8} />
-                <rect x={bx + 11 + i * 14} y={ry + 2.4} width={6} height={4} rx={1} fill={dc ? C.dc : accent} opacity={0.85} />
+                <rect
+                  x={bx + 9 + i * 14}
+                  y={ry}
+                  width={10}
+                  height={15}
+                  rx={1.4}
+                  fill={C.band}
+                  stroke={C.frame}
+                  strokeWidth={0.8}
+                />
+                <rect
+                  x={bx + 11 + i * 14}
+                  y={ry + 2.4}
+                  width={6}
+                  height={4}
+                  rx={1}
+                  fill={dc ? C.dc : accent}
+                  opacity={0.85}
+                />
                 <line
                   x1={bx + 14 + i * 14}
                   y1={ry + 8}
@@ -321,8 +557,23 @@ function Board({ x, y, w, h, accent, dc }: Box & { dc: boolean }) {
         );
       })}
       {/* مشبك التأريض */}
-      <rect x={bx + 8} y={y + bh - 14} width={bw - 16} height={5} rx={1.2} fill={C.earth} opacity={0.35} />
-      <text x={bx + 10} y={y + bh - 10.2} fontFamily={F} fontSize={5} fontWeight={700} fill={C.earth}>
+      <rect
+        x={bx + 8}
+        y={y + bh - 14}
+        width={bw - 16}
+        height={5}
+        rx={1.2}
+        fill={C.earth}
+        opacity={0.35}
+      />
+      <text
+        x={bx + 10}
+        y={y + bh - 10.2}
+        fontFamily={F}
+        fontSize={5}
+        fontWeight={700}
+        fill={C.earth}
+      >
         PE / N BAR
       </text>
       <circle cx={bx + bw - 6} cy={y + 4 + bh / 2} r={2} fill={C.soft} />
@@ -338,7 +589,16 @@ function Ats({ x, y, w, h, accent }: Box) {
   const bh = h - 16;
   return (
     <g filter="url(#eqShadow)">
-      <rect x={bx} y={y + 4} width={bw} height={bh} rx={5} fill="url(#eqMetal)" stroke={C.frame} strokeWidth={1.6} />
+      <rect
+        x={bx}
+        y={y + 4}
+        width={bw}
+        height={bh}
+        rx={5}
+        fill="url(#eqMetal)"
+        stroke={C.frame}
+        strokeWidth={1.6}
+      />
       <rect x={bx} y={y + 4} width={bw} height={bh} rx={5} fill="url(#eqSheen)" />
       {/* مؤشرات المصدر */}
       <circle cx={bx + 17} cy={y + 18} r={3.6} fill={C.earth} />
@@ -350,8 +610,25 @@ function Ats({ x, y, w, h, accent }: Box) {
         GEN
       </text>
       {/* ذراع التحويل */}
-      <rect x={bx + bw - 38} y={y + 13} width={30} height={24} rx={2.6} fill={C.fill} stroke={accent} strokeWidth={1.3} />
-      <line x1={bx + bw - 31} y1={y + 33} x2={bx + bw - 15} y2={y + 17} stroke={accent} strokeWidth={2} strokeLinecap="round" />
+      <rect
+        x={bx + bw - 38}
+        y={y + 13}
+        width={30}
+        height={24}
+        rx={2.6}
+        fill={C.fill}
+        stroke={accent}
+        strokeWidth={1.3}
+      />
+      <line
+        x1={bx + bw - 31}
+        y1={y + 33}
+        x2={bx + bw - 15}
+        y2={y + 17}
+        stroke={accent}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
       <circle cx={bx + bw - 31} cy={y + 33} r={1.8} fill={accent} />
       <circle cx={bx + bw - 15} cy={y + 17} r={1.8} fill={accent} />
       <Nameplate x={bx + 12} y={y + bh - 14} w={Math.max(40, bw * 0.5)} label="ATS 4P" />
@@ -383,7 +660,15 @@ function Grid({ x, y, w, h, accent }: Box) {
       </g>
       <circle cx={cx - 20} cy={top + 4} r={2.4} fill={accent} />
       <circle cx={cx + 20} cy={top + 4} r={2.4} fill={accent} />
-      <rect x={cx - halfBase - 4} y={base} width={halfBase * 2 + 8} height={5} rx={1.4} fill={C.soft} opacity={0.5} />
+      <rect
+        x={cx - halfBase - 4}
+        y={base}
+        width={halfBase * 2 + 8}
+        height={5}
+        rx={1.4}
+        fill={C.soft}
+        opacity={0.5}
+      />
     </g>
   );
 }
@@ -396,7 +681,16 @@ function Loads({ x, y, w, h, accent }: Box) {
   const bh = h - 22;
   return (
     <g filter="url(#eqShadow)">
-      <rect x={bx} y={top} width={bw} height={bh} rx={2} fill="url(#eqMetal)" stroke={accent} strokeWidth={1.6} />
+      <rect
+        x={bx}
+        y={top}
+        width={bw}
+        height={bh}
+        rx={2}
+        fill="url(#eqMetal)"
+        stroke={accent}
+        strokeWidth={1.6}
+      />
       <path
         d={`M ${bx - 8} ${top} L ${bx + bw / 2} ${top - 14} L ${bx + bw + 8} ${top} Z`}
         fill={C.band}
@@ -419,7 +713,16 @@ function Loads({ x, y, w, h, accent }: Box) {
           />
         )),
       )}
-      <rect x={bx + bw / 2 - 7} y={top + bh - 14} width={14} height={14} rx={1} fill={C.fill} stroke={C.soft} strokeWidth={0.8} />
+      <rect
+        x={bx + bw / 2 - 7}
+        y={top + bh - 14}
+        width={14}
+        height={14}
+        rx={1}
+        fill={C.fill}
+        stroke={C.soft}
+        strokeWidth={0.8}
+      />
     </g>
   );
 }
@@ -432,8 +735,24 @@ export function PvRealSymbol({ x, y, w, h }: { x: number; y: number; w: number; 
   const ch = (h - 4) / rows;
   return (
     <g>
-      <rect x={x} y={y} width={w} height={h} rx={2} fill={C.band} stroke={C.frame} strokeWidth={1.4} />
-      <rect x={x + 1.6} y={y + 1.6} width={w - 3.2} height={h - 3.2} fill="url(#eqGlass)" opacity={0.9} />
+      <rect
+        x={x}
+        y={y}
+        width={w}
+        height={h}
+        rx={2}
+        fill={C.band}
+        stroke={C.frame}
+        strokeWidth={1.4}
+      />
+      <rect
+        x={x + 1.6}
+        y={y + 1.6}
+        width={w - 3.2}
+        height={h - 3.2}
+        fill="url(#eqGlass)"
+        opacity={0.9}
+      />
       {Array.from({ length: rows }).map((_, r) =>
         Array.from({ length: cols }).map((_, c) => (
           <g key={`${r}-${c}`}>
@@ -459,7 +778,14 @@ export function PvRealSymbol({ x, y, w, h }: { x: number; y: number; w: number; 
         )),
       )}
       {/* قضيب التجميع الأوسط (half-cut) */}
-      <line x1={x + 1} y1={y + h / 2} x2={x + w - 1} y2={y + h / 2} stroke={C.frame} strokeWidth={1} />
+      <line
+        x1={x + 1}
+        y1={y + h / 2}
+        x2={x + w - 1}
+        y2={y + h / 2}
+        stroke={C.frame}
+        strokeWidth={1}
+      />
       <rect x={x} y={y} width={w} height={h} rx={2} fill="url(#eqSheen)" opacity={0.5} />
     </g>
   );

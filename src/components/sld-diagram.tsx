@@ -35,7 +35,7 @@ import {
 import { downloadSldSheet } from "@/lib/sld-pdf";
 import { downloadSldDxf } from "@/lib/sld-dxf";
 import { mpptMap, mpptMapByInverter } from "@/lib/sld-mppt";
-import { EquipArt, PvRealSymbol, type EquipKind } from "@/components/sld-equipment";
+import { EquipArt, EquipDefs, PvRealSymbol, type EquipKind } from "@/components/sld-equipment";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -350,6 +350,12 @@ function Block({
   const showArt = Boolean(real && art);
   // الوضع الفوتوغرافي: مجسم المعدة فقط، بلا صندوق CAD ولا أسطر مواصفات.
   if (showArt) {
+    // تكبير المجسم حول مركز الصندوق ليظهر بتفاصيل أوضح وأقرب للواقع.
+    const SC = 1.3;
+    const cx = x + w / 2;
+    const cy = y + (h - 14) / 2;
+    const label = title;
+    const lw = label.length * 4.9 + 16;
     return (
       <g
         style={clickable ? { cursor: "pointer" } : undefined}
@@ -357,28 +363,53 @@ function Block({
       >
         {active && (
           <rect
-            x={x - 6}
-            y={y - 6}
-            width={w + 12}
-            height={h + 12}
+            x={cx - (w * SC) / 2 - 8}
+            y={cy - ((h - 14) * SC) / 2 - 8}
+            width={w * SC + 16}
+            height={(h - 14) * SC + 30}
+            rx={6}
             fill="none"
             stroke={accent}
-            strokeWidth={2.2}
+            strokeWidth={2.4}
             strokeDasharray="6 4"
           />
         )}
-        <EquipArt kind={art!} x={x} y={y} w={w} h={h - 14} accent={accent} />
-        <text
-          x={x + w / 2}
-          y={y + h + 2}
-          textAnchor="middle"
-          fontFamily={F}
-          fontSize={9}
-          fontWeight={700}
-          fill={C.ink}
-        >
-          {title}
-        </text>
+        <g transform={`translate(${cx} ${cy}) scale(${SC}) translate(${-cx} ${-cy})`}>
+          <EquipArt kind={art!} x={x} y={y} w={w} h={h - 14} accent={accent} />
+        </g>
+        {/* ظل أرضي ناعم يثبّت المجسم بصرياً */}
+        <ellipse
+          cx={cx}
+          cy={cy + ((h - 14) * SC) / 2 + 12}
+          rx={(w * SC) / 2.6}
+          ry={3.4}
+          fill={C.soft}
+          opacity={0.22}
+        />
+        <g>
+          <rect
+            x={cx - lw / 2}
+            y={cy + ((h - 14) * SC) / 2 + 18}
+            width={lw}
+            height={15}
+            rx={7.5}
+            fill={C.band}
+            stroke={accent}
+            strokeWidth={1}
+            opacity={0.95}
+          />
+          <text
+            x={cx}
+            y={cy + ((h - 14) * SC) / 2 + 28.6}
+            textAnchor="middle"
+            fontFamily={F}
+            fontSize={9}
+            fontWeight={700}
+            fill={C.ink}
+          >
+            {label}
+          </text>
+        </g>
       </g>
     );
   }
@@ -578,7 +609,8 @@ export function SldSvg({
     ? Math.max(1, ...Array.from({ length: drawnInv }, (_, u) => mpptByInv[u]?.length || 1))
     : 1;
   const invUnitH = multiInv ? Math.max(84, maxGroups * 18 + 28) : 92;
-  const invGap = multiInv ? 30 : 22;
+  // الوضع الواقعي يحتاج فراغاً أكبر بين وحدات الإنفرتر لمجسماتها المكبّرة وتسمياتها.
+  const invGap = multiInv ? (real ? 76 : 30) : 22;
   const stackH = drawnInv * invUnitH + (drawnInv - 1) * invGap;
 
   // محور الناقل الرئيسي يتوسّط أطول العنصرين: مصفوفة الألواح أو مجموعة الإنفرترات
@@ -588,8 +620,9 @@ export function SldSvg({
   const invY = busY - stackH / 2;
   const invH = stackH;
 
-  const batY = Math.max(busY + 150, invY + stackH + 96);
-  const bottom = Math.max(busY + 120, batY + 70, invY + stackH + 40);
+  // في الوضع الواقعي تُنزَل خزانة البطاريات لإتاحة مساحة للمجسمات المكبّرة وتسمياتها.
+  const batY = Math.max(busY + 150, invY + stackH + 96) + (real ? 54 : 0);
+  const bottom = Math.max(busY + 120, batY + (real ? 130 : 70), invY + stackH + 40);
   const earthY = bottom + 72;
   const H = earthY + 72;
   /** البطاريات عالية الجهد تُرسم خزانة برجية، والمنخفضة وحدة جدارية. */
@@ -655,6 +688,7 @@ export function SldSvg({
         } as React.CSSProperties
       }
     >
+      <EquipDefs />
       <defs>
         <marker id="sld-arrow" markerWidth={8} markerHeight={8} refX={7} refY={4} orient="auto">
           <path d="M0,0 L8,4 L0,8 z" fill={C.ac} />
@@ -734,7 +768,14 @@ export function SldSvg({
               return (
                 <g key={i}>
                   {[0, 1, 2].map((k) => (
-                    <PvSymbol key={k} x={xPv + k * 30} y={y} w={26} h={22} real={real} />
+                    <PvSymbol
+                      key={k}
+                      x={xPv + k * 30}
+                      y={real ? y - 4 : y}
+                      w={real ? 29 : 26}
+                      h={real ? 29 : 22}
+                      real={real}
+                    />
                   ))}
                   <text x={xPv + 96} y={y + 1} fontFamily={F} fontSize={8.4} fill={C.ink}>
                     {`String ${i + 1} — ${pv.perString} × ${pv.wp} Wp`}
@@ -1045,7 +1086,7 @@ export function SldSvg({
                 })}
                 <text
                   x={xInv}
-                  y={invY + stackH + 24}
+                  y={invY + stackH + (real ? 56 : 24)}
                   textAnchor="start"
                   fontFamily={F}
                   fontSize={8}
@@ -1056,7 +1097,7 @@ export function SldSvg({
                 {invCount > drawnInv && (
                   <text
                     x={xInv}
-                    y={invY + stackH + 40}
+                    y={invY + stackH + (real ? 72 : 40)}
                     textAnchor="start"
                     fontFamily={F}
                     fontSize={7.6}
@@ -1095,13 +1136,16 @@ export function SldSvg({
             const boxX = xInv - 128;
             const bankX = xInv - 336;
             const bankW = 184;
+            // في الوضع الواقعي: الخزانة البرجية رأسية والجدارية أعرض قليلاً.
+            const bankH = real ? (batArt === "battery-rack" ? 142 : 84) : 66;
+            const artW = real ? (batArt === "battery-rack" ? 112 : 150) : bankW;
             return (
               <g opacity={opBat}>
                 <Block
-                  x={bankX}
-                  y={batY - 30}
-                  w={bankW}
-                  h={66}
+                  x={bankX + bankW - artW}
+                  y={batY - bankH / 2 + 3}
+                  w={artW}
+                  h={bankH}
                   title="BATTERY BANK"
                   lines={[
                     `${bat.qty} × ${bat.kwh} kWh = ${bat.totalKwh} kWh`,
@@ -1116,7 +1160,13 @@ export function SldSvg({
                   real={real}
                 />
                 <BatterySymbol x={bankX + bankW + 14} y={batY} />
-                <text x={bankX} y={batY + 50} fontFamily={F} fontSize={8} fill={C.soft}>
+                <text
+                  x={bankX + bankW - artW}
+                  y={real ? batY + (bankH * 1.3) / 2 + 42 : batY + 50}
+                  fontFamily={F}
+                  fontSize={8}
+                  fill={C.soft}
+                >
                   {bat.model}
                 </text>
                 <line

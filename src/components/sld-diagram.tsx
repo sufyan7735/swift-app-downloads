@@ -609,7 +609,8 @@ export function SldSvg({
     ? Math.max(1, ...Array.from({ length: drawnInv }, (_, u) => mpptByInv[u]?.length || 1))
     : 1;
   const invUnitH = multiInv ? Math.max(84, maxGroups * 18 + 28) : 92;
-  const invGap = multiInv ? 30 : 22;
+  // الوضع الواقعي يحتاج فراغاً أكبر بين وحدات الإنفرتر لمجسماتها المكبّرة وتسمياتها.
+  const invGap = multiInv ? (real ? 76 : 30) : 22;
   const stackH = drawnInv * invUnitH + (drawnInv - 1) * invGap;
 
   // محور الناقل الرئيسي يتوسّط أطول العنصرين: مصفوفة الألواح أو مجموعة الإنفرترات

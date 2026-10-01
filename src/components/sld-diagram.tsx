@@ -661,6 +661,7 @@ export function SldSvg({
           @media (prefers-reduced-motion: reduce) { .sldFlow, .sldFlowR { animation: none; } }
         `}</style>
       </defs>
+      <PhotoCtx.Provider value={real}>
 
       {flowNote && (
         <g>

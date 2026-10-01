@@ -8,11 +8,45 @@ import type { SldCable, SldModel } from "@/lib/sld-engine";
 const RHO = 0.0175; // Ω·mm²/m للنحاس عند 20°م
 
 /** أطوال تصميمية نمطية لكل مسار (م) عند غياب مسح موقعي فعلي. */
-export const DEFAULT_ROUTE_LENGTH: Record<string, number> = { W1: 45, W2: 20, W3: 5, W4: 12, W5: 18, W6: 22, PE: 25, C1: 3, C2: 20 };
+export const DEFAULT_ROUTE_LENGTH: Record<string, number> = {
+  W1: 45,
+  W2: 20,
+  W3: 5,
+  W4: 12,
+  W5: 18,
+  W6: 22,
+  PE: 25,
+  C1: 3,
+  C2: 20,
+};
 const ROUTE_LENGTH = DEFAULT_ROUTE_LENGTH;
 
 /** أطوال فعلية يدخلها المهندس يدوياً لكل مسار (اختيارية). */
 export type CableLengths = Record<string, number>;
+
+/** مقاطع يختارها المهندس محلياً لكل مسار قدرة (mm²). */
+export type CableAreas = Record<string, number>;
+
+export type CableSizeOption = { area: number; awg: string };
+
+/** مقاسات النحاس القياسية مع أقرب مكافئ AWG متداول. */
+export const CABLE_SIZE_OPTIONS: CableSizeOption[] = [
+  { area: 2.5, awg: "13 AWG" },
+  { area: 4, awg: "11 AWG" },
+  { area: 6, awg: "9 AWG" },
+  { area: 10, awg: "7 AWG" },
+  { area: 16, awg: "5 AWG" },
+  { area: 25, awg: "3 AWG" },
+  { area: 35, awg: "2 AWG" },
+  { area: 50, awg: "1/0 AWG" },
+  { area: 70, awg: "2/0 AWG" },
+  { area: 95, awg: "3/0 AWG" },
+  { area: 120, awg: "250 kcmil" },
+  { area: 150, awg: "300 kcmil" },
+  { area: 185, awg: "350 kcmil" },
+  { area: 240, awg: "500 kcmil" },
+  { area: 300, awg: "600 kcmil" },
+];
 
 /** الطول الافتراضي لمسار ما قبل أي تعديل يدوي. */
 export function defaultLengthOf(tag: string): number {
@@ -30,7 +64,11 @@ export type CableCalc = {
   length: number;
   /** الطول معدَّل يدوياً من المهندس بدل الطول التصميمي النمطي. */
   custom: boolean;
+  /** المقطع معدَّل يدوياً من المهندس بدل الاختيار التصميمي. */
+  customArea: boolean;
+  awg: string | null;
   dropPct: number | null;
+  dropStatus: "ok" | "warning" | "na";
   kA: number | null;
 };
 
@@ -38,6 +76,25 @@ export type CableCalc = {
 function areaOf(spec: string): number | null {
   const m = /([\d.]+)\s*mm²/.exec(spec);
   return m ? Number(m[1]) : null;
+}
+
+/** أقرب توصيف AWG لمقطع متري، للعرض فقط دون تغيير معادلات IEC. */
+export function awgForArea(area: number | null): string | null {
+  if (!area) return null;
+  return CABLE_SIZE_OPTIONS.reduce((best, option) =>
+    Math.abs(option.area - area) < Math.abs(best.area - area) ? option : best,
+  ).awg;
+}
+
+/** بدائل منطقية حول المقاس التصميمي مع إبقاء كامل المجال الهندسي متاحاً. */
+export function cableSizeOptions(area: number | null): CableSizeOption[] {
+  if (!area) return [];
+  return CABLE_SIZE_OPTIONS;
+}
+
+/** يحدّث أول مقطع ظاهر في وصف الكابل مع الحفاظ على تكوين وعدد الموصلات. */
+function specWithArea(spec: string, area: number): string {
+  return spec.replace(/([\d.]+)(\s*mm²)/, `${area}$2`);
 }
 
 /** التيار المذكور بين قوسين في وصف الكابل. */
@@ -55,12 +112,21 @@ function breakingKa(kind: SldCable["kind"], phase3: boolean, amps: number | null
 }
 
 /** هبوط الجهد ونسبته لكل كابل في المنظومة. */
-export function cableCalcs(m: SldModel, lengths?: CableLengths | undefined): CableCalc[] {
+export function cableCalcs(
+  m: SldModel,
+  lengths?: CableLengths | undefined,
+  areas?: CableAreas | undefined,
+): CableCalc[] {
   const phase3 = Boolean(m.inverter?.phase3 || m.acBox?.phase3);
   const acVolts = phase3 ? 400 : 230;
 
   return m.cables.map((c) => {
-    const area = areaOf(c.spec);
+    const originalArea = areaOf(c.spec);
+    const manualArea = areas?.[c.tag];
+    const customArea =
+      typeof manualArea === "number" && Number.isFinite(manualArea) && manualArea > 0;
+    const area = customArea ? manualArea : originalArea;
+    const spec = area && customArea ? specWithArea(c.spec, area) : c.spec;
     let current = currentOf(c.spec);
     let volts: number | null = null;
 
@@ -74,7 +140,8 @@ export function cableCalcs(m: SldModel, lengths?: CableLengths | undefined): Cab
       }
     } else if (c.kind === "ac") {
       volts = acVolts;
-      if (!current && m.inverter) current = Math.round((m.inverter.totalKw * 1000) / (phase3 ? 400 * 1.732 : 230));
+      if (!current && m.inverter)
+        current = Math.round((m.inverter.totalKw * 1000) / (phase3 ? 400 * 1.732 : 230));
     }
 
     const manual = lengths?.[c.tag];
@@ -90,14 +157,17 @@ export function cableCalcs(m: SldModel, lengths?: CableLengths | undefined): Cab
     return {
       tag: c.tag,
       route: c.route,
-      spec: c.spec,
+      spec,
       kind: c.kind,
       area,
       current: current ?? null,
       volts,
       length,
       custom,
+      customArea,
+      awg: awgForArea(area),
       dropPct,
+      dropStatus: dropPct === null ? "na" : dropPct <= 3 ? "ok" : "warning",
       kA: breakingKa(c.kind, phase3, current ?? null),
     };
   });
@@ -106,9 +176,13 @@ export function cableCalcs(m: SldModel, lengths?: CableLengths | undefined): Cab
 export type InspectItem = { id: string; title: string; subtitle: string; rows: [string, string][] };
 
 /** بطاقات فحص المكوّنات الهندسية القابلة للنقر على المخطط. */
-export function inspectorItems(m: SldModel, lengths?: CableLengths | undefined): Record<string, InspectItem> {
+export function inspectorItems(
+  m: SldModel,
+  lengths?: CableLengths | undefined,
+  areas?: CableAreas | undefined,
+): Record<string, InspectItem> {
   const out: Record<string, InspectItem> = {};
-  const calcs = cableCalcs(m, lengths);
+  const calcs = cableCalcs(m, lengths, areas);
   const byTag = (t: string) => calcs.find((c) => c.tag === t);
   const phase3 = Boolean(m.inverter?.phase3 || m.acBox?.phase3);
 
@@ -122,11 +196,17 @@ export function inspectorItems(m: SldModel, lengths?: CableLengths | undefined):
         ["إجمالي القدرة", `${m.pv.kwp.toFixed(2)} kWp`],
         ["عدد الألواح", `${m.pv.qty} × ${m.pv.wp} Wp`],
         ["السلاسل", `${m.pv.strings} سلسلة × ${m.pv.perString} لوح`],
-        ...(m.pv.strVoc ? ([["جهد السلسلة المفتوح Voc", `${Math.round(m.pv.strVoc)} V`]] as [string, string][]) : []),
-        ...(m.pv.strVmp ? ([["جهد التشغيل Vmp", `${Math.round(m.pv.strVmp)} V`]] as [string, string][]) : []),
+        ...(m.pv.strVoc
+          ? ([["جهد السلسلة المفتوح Voc", `${Math.round(m.pv.strVoc)} V`]] as [string, string][])
+          : []),
+        ...(m.pv.strVmp
+          ? ([["جهد التشغيل Vmp", `${Math.round(m.pv.strVmp)} V`]] as [string, string][])
+          : []),
         ...(m.pv.isc ? ([["تيار القصر Isc/سلسلة", `${m.pv.isc} A`]] as [string, string][]) : []),
         ["كابل السلاسل", w1 ? w1.spec : "PV1-F 1×6 mm² — 1500 V DC"],
-        ...(w1?.dropPct !== null && w1 ? ([["هبوط الجهد المتوقع", `${w1.dropPct}% على ${w1.length} م`]] as [string, string][]) : []),
+        ...(w1?.dropPct !== null && w1
+          ? ([["هبوط الجهد المتوقع", `${w1.dropPct}% على ${w1.length} م`]] as [string, string][])
+          : []),
       ],
     };
   }
@@ -149,20 +229,38 @@ export function inspectorItems(m: SldModel, lengths?: CableLengths | undefined):
   if (m.inverter) {
     const inRange = m.pv?.strVoc && /(\d+)\s*[-–]\s*(\d+)/.exec(m.inverter.mpptRange || "");
     const rng = m.inverter.mpptRange ? /(\d+)\s*[-–]\s*(\d+)/.exec(m.inverter.mpptRange) : null;
-    const ok = Boolean(inRange && rng && m.pv?.strVoc && m.pv.strVoc <= Number(rng[2]) && m.pv.strVoc >= Number(rng[1]));
+    const ok = Boolean(
+      inRange &&
+      rng &&
+      m.pv?.strVoc &&
+      m.pv.strVoc <= Number(rng[2]) &&
+      m.pv.strVoc >= Number(rng[1]),
+    );
     out["inv"] = {
       id: "inv",
       title: "الإنفرتر",
       subtitle: m.inverter.model,
       rows: [
         ["القدرة", `${m.inverter.qty} × ${m.inverter.kw} kW = ${m.inverter.totalKw} kW`],
-        ["نوع التغذية", phase3 ? "ثلاثي الطور 400 V — L1/L2/L3/N/PE" : "أحادي الطور 230 V — L/N/PE"],
+        [
+          "نوع التغذية",
+          phase3 ? "ثلاثي الطور 400 V — L1/L2/L3/N/PE" : "أحادي الطور 230 V — L/N/PE",
+        ],
         ...(m.inverter.mppt ? ([["مداخل MPPT", `${m.inverter.mppt}`]] as [string, string][]) : []),
-        ...(m.inverter.mpptRange ? ([["نطاق جهد MPPT", m.inverter.mpptRange]] as [string, string][]) : []),
-        ...(m.pv?.strVoc && m.inverter.mpptRange
-          ? ([["مطابقة السلسلة", `Voc ${Math.round(m.pv.strVoc)} V — ${ok ? "مطابق للنطاق" : "يلزم مراجعة عدد الألواح"}`]] as [string, string][])
+        ...(m.inverter.mpptRange
+          ? ([["نطاق جهد MPPT", m.inverter.mpptRange]] as [string, string][])
           : []),
-        ...(m.inverter.vbat ? ([["منفذ البطارية", `${m.inverter.vbat} V DC`]] as [string, string][]) : []),
+        ...(m.pv?.strVoc && m.inverter.mpptRange
+          ? ([
+              [
+                "مطابقة السلسلة",
+                `Voc ${Math.round(m.pv.strVoc)} V — ${ok ? "مطابق للنطاق" : "يلزم مراجعة عدد الألواح"}`,
+              ],
+            ] as [string, string][])
+          : []),
+        ...(m.inverter.vbat
+          ? ([["منفذ البطارية", `${m.inverter.vbat} V DC`]] as [string, string][])
+          : []),
         ...(m.bms
           ? ([
               ["منفذ الشبكة GRID", "الشبكة + الأحمال غير الحرجة — فصل تلقائي عند الانقطاع"],
@@ -184,11 +282,19 @@ export function inspectorItems(m: SldModel, lengths?: CableLengths | undefined):
       subtitle: m.battery.model,
       rows: [
         ["السعة", `${m.battery.qty} × ${m.battery.kwh} kWh = ${m.battery.totalKwh} kWh`],
-        ...(m.battery.vdc ? ([["الجهد الاسمي", `${m.battery.vdc} V DC`]] as [string, string][]) : []),
-        ...(m.battery.current ? ([["أقصى تيار", `≈ ${m.battery.current} A`]] as [string, string][]) : []),
-        ...(m.battery.breakerA ? ([["قاطع البطارية", `DC ${m.battery.breakerA} A 2P — 10 kA`]] as [string, string][]) : []),
+        ...(m.battery.vdc
+          ? ([["الجهد الاسمي", `${m.battery.vdc} V DC`]] as [string, string][])
+          : []),
+        ...(m.battery.current
+          ? ([["أقصى تيار", `≈ ${m.battery.current} A`]] as [string, string][])
+          : []),
+        ...(m.battery.breakerA
+          ? ([["قاطع البطارية", `DC ${m.battery.breakerA} A 2P — 10 kA`]] as [string, string][])
+          : []),
         ...(w3 ? ([["كابل البطارية", w3.spec]] as [string, string][]) : []),
-        ...(w3?.dropPct !== null && w3 ? ([["هبوط الجهد المتوقع", `${w3.dropPct}% على ${w3.length} م`]] as [string, string][]) : []),
+        ...(w3?.dropPct !== null && w3
+          ? ([["هبوط الجهد المتوقع", `${w3.dropPct}% على ${w3.length} م`]] as [string, string][])
+          : []),
       ],
     };
   }
@@ -205,7 +311,9 @@ export function inspectorItems(m: SldModel, lengths?: CableLengths | undefined):
         ["مانع الصواعق", "AC SPD Type 2"],
         ["سعة الكسر", `${m.acBox.phase3 || m.acBox.breakerA > 63 ? 15 : 6} kA`],
         ...(w4 ? ([["كابل الخروج", w4.spec]] as [string, string][]) : []),
-        ...(w4?.dropPct !== null && w4 ? ([["هبوط الجهد المتوقع", `${w4.dropPct}%`]] as [string, string][]) : []),
+        ...(w4?.dropPct !== null && w4
+          ? ([["هبوط الجهد المتوقع", `${w4.dropPct}%`]] as [string, string][])
+          : []),
       ],
     };
   }
@@ -264,7 +372,9 @@ export function inspectorItems(m: SldModel, lengths?: CableLengths | undefined):
         ["المصدر", "مخرج الطوارئ من الإنفرتر — بطارية + ألواح"],
         ["زمن التحويل", "أقل من 10 ميلي ثانية"],
         ...(w6 ? ([["كابل التغذية", w6.spec]] as [string, string][]) : []),
-        ...(w6?.dropPct !== null && w6 ? ([["هبوط الجهد المتوقع", `${w6.dropPct}%`]] as [string, string][]) : []),
+        ...(w6?.dropPct !== null && w6
+          ? ([["هبوط الجهد المتوقع", `${w6.dropPct}%`]] as [string, string][])
+          : []),
       ],
     };
   }

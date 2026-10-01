@@ -10,7 +10,11 @@ import logoAsset from "@/assets/actes-logo-sld.png.asset.json";
 const LOGO = logoAsset.url;
 
 const esc = (s: unknown) =>
-  String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 
 /** يقرأ الرسم المتجهي المعروض حالياً في الشاشة. */
 function currentSvg(): string {
@@ -24,7 +28,11 @@ function currentSvg(): string {
   return clone.outerHTML;
 }
 
-export function downloadSldSheet(m: SldModel, number?: string, calcs?: CableCalc[] | undefined): void {
+export function downloadSldSheet(
+  m: SldModel,
+  number?: string,
+  calcs?: CableCalc[] | undefined,
+): void {
   const drawing = currentSvg();
   const ref = number || m.title.ref || "—";
   const t = m.title;
@@ -53,7 +61,10 @@ export function downloadSldSheet(m: SldModel, number?: string, calcs?: CableCalc
             const k = calcOf(c.tag);
             const len = k ? `${k.length} m${k.custom ? " *" : ""}` : "—";
             const dv = k && k.dropPct !== null ? `${k.dropPct}%` : "—";
-            const warn = k && k.dropPct !== null && k.dropPct > 3 ? ' style="color:#b4231f;font-weight:700"' : "";
+            const warn =
+              k && k.dropPct !== null && k.dropPct > 3
+                ? ' style="color:#b4231f;font-weight:700"'
+                : "";
             return `<tr><td class="c b">${esc(c.tag)}</td><td>${esc(c.route)}</td><td>${esc(k?.spec || c.spec)}${k?.awg ? ` — ${esc(k.awg)}` : ""}</td><td class="c">${esc(len)}</td><td class="c"${warn}>${esc(dv)}</td></tr>`;
           })
           .join("")}</tbody>
@@ -69,12 +80,17 @@ export function downloadSldSheet(m: SldModel, number?: string, calcs?: CableCalc
     ? `<table class="dt">
         <thead><tr><th style="width:8mm">#</th><th>SYSTEM ITEM — أصناف المنظومة</th><th style="width:26mm">QTY</th></tr></thead>
         <tbody>${m.bom
-          .map((r, i) => `<tr><td class="c">${i + 1}</td><td dir="rtl">${esc(r.name)}</td><td class="c b">${esc(r.qty)} ${esc(r.unit)}</td></tr>`)
+          .map(
+            (r, i) =>
+              `<tr><td class="c">${i + 1}</td><td dir="rtl">${esc(r.name)}</td><td class="c b">${esc(r.qty)} ${esc(r.unit)}</td></tr>`,
+          )
           .join("")}</tbody>
        </table>`
     : "";
 
-  const notes = m.notes.length ? `<ul class="notes">${m.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : "";
+  const notes = m.notes.length
+    ? `<ul class="notes">${m.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>`
+    : "";
 
   const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"/>
 <title>ACTES — Single Line Diagram ${esc(ref)}</title>

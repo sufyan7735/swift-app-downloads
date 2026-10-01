@@ -7,3 +7,4 @@
 - [x] Verify calculations, build health, and responsive desktop/mobile rendering.
 
 - [x] Catalogs: per-value highlight of shown model (EN + AR official PDFs)
+- [x] Home partners strip: real Li-Power logo + each partner links to official site

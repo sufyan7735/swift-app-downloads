@@ -1422,6 +1422,14 @@ function HomeDashboard({ onService, onProducts }: { onService: (kind: "quote" | 
   );
 }
 
+const PARTNER_LINKS = [
+  { name: "Li Power", url: "https://www.lipowergroup.com", from: 90, to: 238 },
+  { name: "PYLONTECH", url: "https://en.pylontech.com.cn", from: 270, to: 468 },
+  { name: "SUNTECH", url: "https://www.suntech-power.com", from: 492, to: 686 },
+  { name: "HiTHIUM", url: "https://www.hithium.com", from: 716, to: 886 },
+  { name: "sunways", url: "https://www.sunways-tech.com", from: 918, to: 1110 },
+];
+
 function PartnersStrip() {
   const trackRef = useRef<HTMLDivElement>(null);
   const scrollBy = (dir: number) => {
@@ -1444,14 +1452,28 @@ function PartnersStrip() {
         </button>
 
         <div ref={trackRef} className="min-w-0 flex-1 overflow-x-auto scrollbar-none">
-          <img
-            src={partnersStrip}
-            alt="وكلاء ACTES: Li Power، PYLONTECH، SUNTECH، HTHIUM، sunways"
-            loading="eager"
-            decoding="sync"
-            fetchPriority="high"
-            className="mx-auto block h-12 w-auto max-w-none object-contain sm:h-14 lg:h-11 lg:w-full"
-          />
+          <div className="relative mx-auto w-fit">
+            <img
+              src={partnersStrip}
+              alt="وكلاء ACTES: Li Power، PYLONTECH، SUNTECH، HTHIUM، sunways"
+              loading="eager"
+              decoding="sync"
+              fetchPriority="high"
+              className="block h-12 w-auto max-w-none sm:h-14 lg:h-11"
+            />
+            {PARTNER_LINKS.map((p) => (
+              <a
+                key={p.name}
+                href={p.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`موقع ${p.name} الرسمي`}
+                title={p.name}
+                className="absolute inset-y-0 rounded-lg transition hover:bg-navy/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold"
+                style={{ left: `${(p.from / 1200) * 100}%`, width: `${((p.to - p.from) / 1200) * 100}%` }}
+              />
+            ))}
+          </div>
         </div>
 
         <button

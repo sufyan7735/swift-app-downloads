@@ -1223,7 +1223,19 @@ function expandProduct(base: Product): Product[] {
 }
 
 /** قائمة العرض في الكتالوج: كل قدرة إنفرتر صنف مستقل بدل النطاقات. */
-export const CATALOG_PRODUCTS: Product[] = PRODUCTS.flatMap(expandProduct);
+/** القدرات المعروضة فقط لكل علامة في قسم الإنفرترات. */
+const INVERTER_KW_ALLOWED: Record<string, number[]> = {
+  Deye: [6, 8, 12, 16, 20, 30, 50, 80, 125],
+  Solis: [6, 8, 12, 16, 20, 30, 50, 80, 125],
+  "Li-Power": [1.6, 6.2],
+};
+function inverterAllowed(p: Product) {
+  if (p.category !== "inverters") return true;
+  const allowed = INVERTER_KW_ALLOWED[p.brand];
+  const kw = parseFloat(String(p.power).replace(/[^\d.]/g, ""));
+  return Boolean(allowed && allowed.includes(kw));
+}
+export const CATALOG_PRODUCTS: Product[] = PRODUCTS.flatMap(expandProduct).filter(inverterAllowed);
 
 function capacityKWh(p: Product) {
   const src = `${p.power ?? ""} ${p.name ?? ""}`;

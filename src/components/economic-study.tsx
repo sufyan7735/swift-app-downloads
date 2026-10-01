@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowLeft, BadgeDollarSign, Download, Leaf, LineChart, Network, RotateCcw, ShoppingCart } from "lucide-react";
+import { ArrowLeft, BadgeDollarSign, Download, Headphones, Leaf, LineChart, Network, RotateCcw, ShoppingCart } from "lucide-react";
 import { buildPvsystStudy } from "@/lib/pvsyst-engine";
 import {
   buildEconomics,
@@ -25,7 +25,7 @@ const MONTHS_AR = ["ينا", "فبر", "مار", "أبر", "ماي", "يون", "
 
 type Props = {
   study: NonNullable<View["study"]>;
-  actions?: { onBuy: () => void; onBackToQuote: () => void; onStudy?: (() => void) | undefined; onSld?: (() => void) | undefined };
+  actions?: { onBuy: () => void; onSales: () => void };
 };
 
 /** شاشة دراسة الجدوى الاقتصادية والبيئية المستقلة. */
@@ -368,27 +368,15 @@ export default function EconomicStudy({ study, actions }: Props) {
       </button>
 
       {actions && (
-        <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <button type="button" onClick={actions.onBuy}
             className="flex items-center justify-center gap-2 rounded-full bg-energy px-4 py-3 text-sm font-black text-energy-foreground shadow-sm ring-1 ring-black/5 transition hover:opacity-90">
             <ShoppingCart className="size-4" /> متابعة الشراء
           </button>
-          <button type="button" onClick={actions.onBackToQuote}
-            className="flex items-center justify-center gap-2 rounded-full bg-brand px-4 py-3 text-sm font-black text-brand-foreground shadow-sm ring-1 ring-black/5 transition hover:opacity-90">
-            <ArrowLeft className="size-4" /> العودة لعرض السعر
+          <button type="button" onClick={actions.onSales}
+            className="flex items-center justify-center gap-2 rounded-full border border-border bg-card px-4 py-3 text-sm font-black text-foreground shadow-sm transition hover:border-brand hover:text-brand">
+            <Headphones className="size-4 text-brand" /> التواصل مع المبيعات
           </button>
-          {actions.onStudy && (
-            <button type="button" onClick={actions.onStudy}
-              className="flex items-center justify-center gap-2 rounded-full bg-skyline px-4 py-3 text-sm font-black text-skyline-foreground shadow-sm ring-1 ring-black/5 transition hover:opacity-90">
-              <LineChart className="size-4" /> دراسة PVsyst
-            </button>
-          )}
-          {actions.onSld && (
-            <button type="button" onClick={actions.onSld}
-              className="flex items-center justify-center gap-2 rounded-full bg-field px-4 py-3 text-sm font-black text-field-foreground shadow-sm ring-1 ring-black/5 transition hover:opacity-90">
-              <Network className="size-4" /> مخطط SLD
-            </button>
-          )}
         </div>
       )}
     </section>

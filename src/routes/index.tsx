@@ -1635,9 +1635,7 @@ function QuoteWorkspace({ view, session, step, draft, setDraft, onPick, onBack, 
                 study={ecoScreen}
                 actions={{
                   onBuy: () => onPick("buy_invoice"),
-                  onBackToQuote: () => setShowEco(false),
-                  onStudy: studyFresh ? () => { setShowEco(false); setShowStudyOnly(true); } : undefined,
-                  onSld: () => { setShowEco(false); onPick("sld_yes"); },
+                  onSales: () => onPick("sales_contact"),
                 }}
               />
             ) : sldScreen ? (
@@ -1645,9 +1643,8 @@ function QuoteWorkspace({ view, session, step, draft, setDraft, onPick, onBack, 
                 params={sldParams}
                 number={view.sld?.number}
                 actions={{
-                  onBackToQuote: () => setShowSldOnly(false),
                   onBuy: () => onPick("buy_invoice"),
-                  onStudy: view.study ? () => { setShowSldOnly(false); setShowStudyOnly(true); } : undefined,
+                  onSales: () => onPick("sales_contact"),
                 }}
               />
             ) : studyScreen ? (
@@ -1655,8 +1652,7 @@ function QuoteWorkspace({ view, session, step, draft, setDraft, onPick, onBack, 
                 study={studyScreen}
                 actions={{
                   onBuy: () => onPick("buy_invoice"),
-                  onBackToQuote: () => setShowStudyOnly(false),
-                  onSld: () => onPick("sld_yes"),
+                  onSales: () => onPick("sales_contact"),
                 }}
               />
             ) : (

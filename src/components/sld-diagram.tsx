@@ -6,6 +6,7 @@ import {
   Download,
   Expand,
   FileDown,
+  Headphones,
   ImageDown,
   LineChart,
   Minus,
@@ -106,9 +107,8 @@ export type SldTheme = keyof typeof THEMES;
 const F = "'Segoe UI', 'Tahoma', sans-serif";
 
 type SldActions = {
-  onBackToQuote: () => void;
   onBuy: () => void;
-  onStudy?: (() => void) | undefined;
+  onSales: () => void;
 };
 type Props = {
   params: Record<string, unknown> | null;
@@ -2384,14 +2384,7 @@ export default function SldDiagram({ params, number, actions }: Props) {
       )}
 
       {actions ? (
-        <div className="mt-5 grid gap-2 border-t border-border pt-4 sm:grid-cols-3">
-          <button
-            type="button"
-            onClick={actions.onBackToQuote}
-            className="flex items-center justify-center gap-2 rounded-full border border-border bg-card px-4 py-3 text-xs font-black text-navy transition hover:border-brand hover:text-brand"
-          >
-            <ArrowRight className="size-4" /> العودة إلى عرض السعر
-          </button>
+        <div className="mt-5 grid gap-2 border-t border-border pt-4 sm:grid-cols-2">
           <button
             type="button"
             onClick={actions.onBuy}
@@ -2399,15 +2392,13 @@ export default function SldDiagram({ params, number, actions }: Props) {
           >
             <ShoppingCart className="size-4" /> متابعة الشراء
           </button>
-          {actions.onStudy && (
-            <button
-              type="button"
-              onClick={actions.onStudy}
-              className="flex items-center justify-center gap-2 rounded-full bg-skyline px-4 py-3 text-xs font-black text-skyline-foreground transition hover:opacity-90"
-            >
-              <LineChart className="size-4" /> الانتقال لدراسة PVsyst
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={actions.onSales}
+            className="flex items-center justify-center gap-2 rounded-full border border-border bg-card px-4 py-3 text-xs font-black text-navy transition hover:border-brand hover:text-brand"
+          >
+            <Headphones className="size-4 text-brand" /> التواصل مع المبيعات
+          </button>
         </div>
       ) : (
         <button

@@ -131,6 +131,7 @@ function Node({ x, y, color }: { x: number; y: number; color: string }) {
 
 /** علامة قطبية التيار المستمر (+ / −). */
 function Polarity({ x, y, sign }: { x: number; y: number; sign: "+" | "−" }) {
+  if (useHideSchematic()) return null;
   return (
     <text
       x={x}
@@ -148,6 +149,7 @@ function Polarity({ x, y, sign }: { x: number; y: number; sign: "+" | "−" }) {
 
 /** علامة عدد موصلات التيار المتردد على الخط (IEC). */
 function PhaseMark({ x, y, phase3 }: { x: number; y: number; phase3: boolean }) {
+  if (useHideSchematic()) return null;
   const n = phase3 ? 4 : 2;
   return (
     <g>
@@ -196,6 +198,7 @@ function PvSymbol({
 
 /** رمز قاطع دائرة (Circuit Breaker). */
 function BreakerSymbol({ x, y }: { x: number; y: number }) {
+  if (useHideSchematic()) return null;
   return (
     <g>
       <line x1={x} y1={y - 12} x2={x} y2={y - 5} stroke={C.ink} strokeWidth={1.4} />
@@ -208,6 +211,7 @@ function BreakerSymbol({ x, y }: { x: number; y: number }) {
 
 /** رمز فيوز (Fuse). */
 function FuseSymbol({ x, y }: { x: number; y: number }) {
+  if (useHideSchematic()) return null;
   return (
     <g>
       <rect
@@ -226,6 +230,7 @@ function FuseSymbol({ x, y }: { x: number; y: number }) {
 
 /** رمز مانع صواعق (SPD). */
 function SpdSymbol({ x, y }: { x: number; y: number }) {
+  if (useHideSchematic()) return null;
   return (
     <g>
       <rect
@@ -245,6 +250,7 @@ function SpdSymbol({ x, y }: { x: number; y: number }) {
 
 /** رمز بطارية (خلايا متعددة). */
 function BatterySymbol({ x, y }: { x: number; y: number }) {
+  if (useHideSchematic()) return null;
   return (
     <g>
       {[0, 1, 2].map((i) => (
@@ -273,6 +279,7 @@ function BatterySymbol({ x, y }: { x: number; y: number }) {
 
 /** رمز تأريض قياسي. */
 function EarthSymbol({ x, y }: { x: number; y: number }) {
+  if (useHideSchematic()) return null;
   return (
     <g stroke={C.earth} strokeWidth={1.8}>
       <line x1={x - 13} y1={y} x2={x + 13} y2={y} />
@@ -284,6 +291,7 @@ function EarthSymbol({ x, y }: { x: number; y: number }) {
 
 /** رمز عداد ذكي / محول تيار (IEC) عند نقطة الربط بالشبكة. */
 function MeterSymbol({ x, y }: { x: number; y: number }) {
+  if (useHideSchematic()) return null;
   return (
     <g>
       <circle cx={x} cy={y} r={11} fill={C.fill} stroke={C.ac} strokeWidth={1.5} />
@@ -420,6 +428,7 @@ function WireTag({
 
 /** شارة فورية لهبوط الجهد، مرتبطة بحساب الكابل الحالي. */
 function VoltageDropBadge({ x, y, calc }: { x: number; y: number; calc?: CableCalc | undefined }) {
+  if (useHideSchematic()) return null;
   const warning = calc?.dropStatus === "warning";
   const ok = calc?.dropStatus === "ok";
   const label =
@@ -448,6 +457,7 @@ function VoltageDropBadge({ x, y, calc }: { x: number; y: number; calc?: CableCa
 
 /** رمز مفتاح عزل ميكانيكي (DC Rotary Isolator) للفصل اليدوي أثناء الصيانة. */
 function IsolatorSymbol({ x, y, color }: { x: number; y: number; color: string }) {
+  if (useHideSchematic()) return null;
   return (
     <g>
       <line x1={x} y1={y - 13} x2={x} y2={y - 6} stroke={color} strokeWidth={1.4} />
@@ -464,6 +474,7 @@ function IsolatorSymbol({ x, y, color }: { x: number; y: number; color: string }
 
 /** رمز قاطع تسريب أرضي من النوع B (RCD Type B) الإلزامي للإنفرترات. */
 function RcdSymbol({ x, y, color }: { x: number; y: number; color: string }) {
+  if (useHideSchematic()) return null;
   return (
     <g>
       <rect

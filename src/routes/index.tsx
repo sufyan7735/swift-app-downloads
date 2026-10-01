@@ -1423,7 +1423,6 @@ function HomeDashboard({ onService, onProducts }: { onService: (kind: "quote" | 
 }
 
 const PARTNER_LINKS = [
-  { name: "Li Power", url: "https://www.lipowergroup.com", from: 90, to: 238 },
   { name: "PYLONTECH", url: "https://en.pylontech.com.cn", from: 270, to: 468 },
   { name: "SUNTECH", url: "https://www.suntech-power.com", from: 492, to: 686 },
   { name: "HiTHIUM", url: "https://www.hithium.com", from: 716, to: 886 },

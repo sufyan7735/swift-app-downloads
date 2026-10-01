@@ -1330,10 +1330,10 @@ function normalizeModel(text: string) {
 const ARABIC_BRANDS: { pattern: RegExp; brand: string }[] = [
   { pattern: /سنتك|SUNTECH/i, brand: "Suntech" },
   { pattern: /داي|دي\s*اي|DEYE/i, brand: "Deye" },
-  { pattern: /سوليس|SOLIS/i, brand: "Solis" },
-  { pattern: /لايف?\s*باور|لي\s*باور|LI-?POWER/i, brand: "Li-Power" },
+  { pattern: /سوليس|سوليز|SOLIS/i, brand: "Solis" },
+  { pattern: /لايف?\s*باور|لي\s*باور|ليو\s*باور|LI-?POWER/i, brand: "Li-Power" },
   { pattern: /بايلونتك|بايلونتيك|PYLONTECH/i, brand: "Pylontech" },
-  { pattern: /هايثيوم|HITHIUM|HEROEE/i, brand: "HiTHIUM (HeroEE)" },
+  { pattern: /هايثيوم|هيثيوم|HITHIUM|HEROEE/i, brand: "HiTHIUM" },
 ];
 
 /**
@@ -1440,22 +1440,26 @@ export function findCatalogProductForSpec(text: string, category: ProductCategor
     return byModel;
   }
 
+  const brandHit = ARABIC_BRANDS.find((b) => b.pattern.test(text));
+  const brandPool = brandHit ? pool.filter((p) => p.brand.toLowerCase().includes(brandHit.brand.toLowerCase().split(" ")[0]!)) : pool;
+  const kiloNum = (u: "kW" | "kWh") => {
+    const v = readKiloValue(text, u);
+    if (v != null) return v;
+    const m = text.match(/([\d]+(?:[.,]\d+)?)\s*كيلو/);
+    return m?.[1] ? Number(m[1].replace(",", ".")) : null;
+  };
+
   if (category === "inverters") {
-    const kw = readKiloValue(text, "kW");
+    const kw = kiloNum("kW");
     if (kw != null) {
       const three = wantsThreePhase(full) ? true : wantsSinglePhase(full) ? false : null;
       const phaseOk = (p: Product) => three === null || isThreePhaseProduct(p) === three;
-      const ranged = pool
+      const ranged = brandPool
         .map((p) => ({ p, r: powerRangeOf(p) }))
         .filter((x): x is { p: Product; r: { min: number; max: number; unit: "W" | "kW" | "kWh" } } => !!x.r && x.r.unit === "kW");
-      const inRange = ranged.filter((x) => kw >= x.r.min - 0.05 && kw <= x.r.max + 0.05);
-      const pick = (list: typeof ranged) => {
-        const withPhase = list.filter((x) => phaseOk(x.p));
-        const base = withPhase.length ? withPhase : list;
-        return base.sort((a, b) => a.r.max - b.r.max)[0]?.p ?? null;
-      };
-      const hit = pick(inRange) ?? pick(ranged.filter((x) => x.r.max >= kw));
-      if (hit) return hit;
+      const inRange = ranged.filter((x) => kw >= x.r.min - 0.05 && kw <= x.r.max + 0.05 && phaseOk(x.p));
+      // مطابقة صارمة فقط: لا صورة لموديل غير موجود في الكتالوج
+      return inRange.sort((a, b) => a.r.max - b.r.max)[0]?.p ?? null;
     }
     return byModel;
   }
@@ -1463,17 +1467,16 @@ export function findCatalogProductForSpec(text: string, category: ProductCategor
   if (category === "batteries") {
     const ah = text.match(/(\d{2,4})\s*(?:أمبير\s*ساعة|أمبير|امبير|Ah)\b/i);
     if (ah?.[1]) {
-      const byAh = pool.find((p) => p.name.includes(`${ah[1]}Ah`) || p.model.includes(ah[1]!));
+      const byAh = brandPool.find((p) => p.name.includes(`${ah[1]}Ah`) || p.model.includes(ah[1]!));
       if (byAh) return byAh;
     }
-    const kwh = readKiloValue(text, "kWh");
+    const kwh = kiloNum("kWh");
     if (kwh != null) {
-      const ranked = pool
+      const hit = brandPool
         .map((p) => ({ p, r: powerRangeOf(p) }))
-        .filter((x) => x.r && x.r.unit === "kWh")
-        .map((x) => ({ p: x.p, diff: Math.abs(x.r!.min - kwh) }))
-        .sort((a, b) => a.diff - b.diff);
-      if (ranked[0]) return ranked[0].p;
+        .filter((x) => x.r && x.r.unit === "kWh" && Math.abs(x.r.min - kwh) <= 0.15)
+        .sort((a, b) => Math.abs(a.r!.min - kwh) - Math.abs(b.r!.min - kwh))[0];
+      return hit?.p ?? null;
     }
     return byModel;
   }

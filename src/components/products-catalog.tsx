@@ -347,7 +347,7 @@ function ProductDetail({ product, onOpen, onBack, backLabel }: { product: Produc
   // بلا تكرار الاسم أو الموديل أو القدرة أو المواصفات التي نطقها الفيديو.
   const afterVideoText = useMemo(() => {
     if (video) return afterVideoNarration(product);
-    return `${product.name} من ${product.brand}. الموديل ${product.model}. ${product.description}`;
+    return `${product.name}. ${afterVideoNarration(product).split(".")[0]}.`;
   }, [product, video]);
 
   useScreenVoice(`catalog-product-${product.id}`, reelDone ? afterVideoText : "", !!video);

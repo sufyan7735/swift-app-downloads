@@ -85,7 +85,7 @@ import { findCatalogProductForSpec } from "@/lib/products-data";
 import { itemImage } from "@/lib/item-images";
 
 import { runBot, type BotResult, type BotSession } from "@/lib/bot-engine.js";
-import { buildView, formatSystemName, money, type View } from "@/lib/present";
+import { buildView, formatSystemName, money, type QuoteItem, type View } from "@/lib/present";
 import { CERTIFICATES, CERTIFICATES_TITLE } from "@/lib/warranty";
 import { useServerFn } from "@tanstack/react-start";
 import { verifyAdminPassword } from "@/lib/admin.functions";

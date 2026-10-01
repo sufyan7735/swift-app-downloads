@@ -307,8 +307,8 @@ function ProductCard({ product, onOpen }: { product: Product; onOpen: () => void
       onTouchStart={warm}
       className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card text-right shadow-sm transition hover:shadow-md"
     >
+      <BrandBadge brand={product.brand} />
       <button type="button" onClick={() => { warm(); onOpen(); }} aria-label={product.name} className="relative block aspect-[4/5] w-full overflow-hidden bg-background">
-        <BrandBadge brand={product.brand} />
         <img src={product.image} alt={product.name} loading="lazy" decoding="async" width={800} height={1000} className="size-full scale-105 object-contain p-1 transition duration-500 group-hover:scale-110" />
       </button>
 
@@ -532,7 +532,9 @@ function ProductDetail({ product, onOpen, onBack, backLabel }: { product: Produc
       <section className="grid gap-4 rounded-2xl border border-border bg-card p-3 shadow-sm md:grid-cols-[minmax(0,3fr)_minmax(0,3fr)] lg:p-5">
         <div className="relative overflow-hidden rounded-xl border border-border/70 bg-background">
           <BrandBadge brand={product.brand} large />
-          <img src={product.image} alt={product.name} width={1200} height={1200} className="aspect-square w-full scale-105 object-contain p-1.5" />
+          <div className="overflow-hidden">
+          <img src={product.image} alt={product.name} width={1200} height={1200} className="aspect-square w-full object-contain p-1.5" />
+          </div>
         </div>
         <div className="flex flex-col gap-3">
           <div>

@@ -28,8 +28,6 @@ import {
   Building2,
   Check,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   CircleDollarSign,
   Download,
   FileCheck2,

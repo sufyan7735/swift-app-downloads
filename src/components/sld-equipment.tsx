@@ -271,7 +271,6 @@ function Inverter({ x, y, w, h, accent }: Box) {
       <text x={bx + 27} y={y + bh - 24} fontFamily={F} fontSize={5.8} fontWeight={700} fill={C.dc}>
         DC SWITCH
       </text>
-      <Nameplate x={bx + 27} y={y + bh - 20} w={Math.max(44, bw * 0.42)} label="HYBRID INVERTER" />
       <Glands x={bx + 12} y={y + bh + 1} n={Math.max(3, Math.floor(bw / 28))} />
     </g>
   );

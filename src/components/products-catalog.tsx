@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { ArrowRight, BatteryCharging, Check, ChevronDown, Container, Copy, Download, Eye, FileText, Gauge, Info, Layers, Link2, ListChecks, MessageCircle, Play, Share2, Sparkles, Sun, Users, Wrench, X, Zap } from "lucide-react";
+import { ArrowRight, Search, BatteryCharging, Check, ChevronDown, Container, Copy, Download, Eye, FileText, Gauge, Info, Layers, Link2, ListChecks, MessageCircle, Play, Share2, Sparkles, Sun, Users, Wrench, X, Zap } from "lucide-react";
 import QRCode from "qrcode";
 import { CATEGORIES, findProduct, matchCompatibleProducts, productsByCategory, quickSpecs, type Product, type ProductCategory, type ProductFile } from "@/lib/products-data";
 import { isVoiceOn, isVoicePlatform, prepareSpeech, silenceNextScreen, speakScreen, speakScreenAfterCurrent, stopSpeaking } from "@/lib/voice-guide";
@@ -38,19 +38,20 @@ function useScreenVoice(key: string, text: string, continueAfter = false) {
 
 export default function ProductsCatalog({ productId, onOpen, onBack, returnTo }: { productId: string | null; onOpen: (id: string | null) => void; onBack: () => void; returnTo?: { label: string; onReturn: () => void } | null }) {
   const product = productId ? findProduct(productId) : undefined;
-  const [category, setCategory] = useState<ProductCategory | null>(product ? product.category : null);
+  const [category, setCategory] = useState<ProductCategory | "all" | null>(product ? product.category : null);
 
   if (product) {
     return (
       <ProductDetail
         product={product}
         onOpen={onOpen}
-        onBack={returnTo ? returnTo.onReturn : () => { setCategory(product.category); onOpen(null); }}
+        onBack={returnTo ? returnTo.onReturn : () => { setCategory((c) => (c === "all" ? "all" : product.category)); onOpen(null); }}
         backLabel={returnTo ? returnTo.label : undefined}
       />
     );
   }
 
+  if (category === "all") return <AllProductsView onOpen={onOpen} onBack={() => setCategory(null)} />;
   if (category) {
     return <CategoryView category={category} onOpen={onOpen} onBack={() => setCategory(null)} />;
   }
@@ -74,7 +75,7 @@ const PREVIEW_IDS: Partial<Record<ProductCategory, string[]>> = {
 };
 
 /** المستوى الأول: ثلاث بطاقات ضخمة للأقسام. */
-function CategoriesScreen({ onPick, onBack }: { onPick: (c: ProductCategory) => void; onBack: () => void }) {
+function CategoriesScreen({ onPick, onBack }: { onPick: (c: ProductCategory | "all") => void; onBack: () => void }) {
   useScreenVoice(
     "catalog-home",
     "قسم منتجات أكتس. اختر الفئة التي تريد استعراضها: الألواح الشمسية، أو الإنفرترات، أو بطاريات الليثيوم، أو أنظمة التخزين.",
@@ -135,30 +136,128 @@ function CategoriesScreen({ onPick, onBack }: { onPick: (c: ProductCategory) => 
             </button>
           );
         })}
+        <button
+          type="button"
+          onClick={() => onPick("all")}
+          className="group flex flex-col justify-between gap-4 overflow-hidden rounded-2xl border border-border bg-card p-5 text-right shadow-sm transition hover:-translate-y-0.5 hover:shadow-xl md:col-span-3"
+        >
+          <span className="flex items-center justify-between">
+            <span>
+              <span className="block text-2xl font-black text-navy lg:text-3xl">كل المنتجات</span>
+              <span className="mt-1 block text-[12px] font-bold text-muted-foreground">ابحث في جميع الموديلات وصفّها حسب الشركة المصنّعة</span>
+            </span>
+            <Search className="size-10 text-skyline lg:size-12" />
+          </span>
+          <span className="inline-flex w-fit items-center gap-1 rounded-full bg-brand px-3 py-1.5 text-xs font-bold text-brand-foreground">
+            <ArrowRight className="size-3.5" /> استعراض الكل
+          </span>
+        </button>
       </div>
     </div>
   );
 }
 
-/** المستوى الثاني: بطاقات موديلات الفئة المختارة. */
+/** اسم الشركة المصنّعة الموحّد (يدمج صيغ HiTHIUM المختلفة). */
+export function brandOf(p: Product) {
+  return /hithium/i.test(p.brand) ? "HiTHIUM" : p.brand;
+}
+
+/** المستوى الثاني: أقسام الشركات المصنّعة، ثم موديلات الشركة المختارة. */
 function CategoryView({ category, onOpen, onBack }: { category: ProductCategory; onOpen: (id: string) => void; onBack: () => void }) {
   const cat = CATEGORIES.find((c) => c.id === category)!;
   const items = useMemo(() => productsByCategory(category), [category]);
-  useScreenVoice(`catalog-cat-${category}`, `${cat.title}. يتوفر ${items.length} موديل. اختر الموديل لعرض مواصفاته وملفاته الرسمية.`);
+  const brands = useMemo(() => Array.from(new Set(items.map(brandOf))), [items]);
+  const [brand, setBrand] = useState<string | null>(brands.length === 1 ? brands[0] ?? null : null);
+  const shown = brand ? items.filter((p) => brandOf(p) === brand) : [];
+  useScreenVoice(
+    `catalog-cat-${category}-${brand ?? "brands"}`,
+    brand ? `${cat.title} من ${brand}. يتوفر ${shown.length} موديل.` : `${cat.title}. اختر الشركة المصنّعة لعرض موديلاتها.`,
+  );
+  const goBack = brand && brands.length > 1 ? () => setBrand(null) : onBack;
   return (
     <div className="screen-enter w-full space-y-4 pb-4">
-
-      <BackButton onClick={onBack} label="الفئات" />
+      <BackButton onClick={goBack} label={brand && brands.length > 1 ? cat.title : "الفئات"} />
       <header className={`flex items-center gap-3 rounded-2xl px-4 py-4 shadow-sm ${CAT_TONE[category]}`}>
         <span className="shrink-0 opacity-90">{CAT_BIG_ICON[category]}</span>
         <div>
-          <h1 className="text-xl font-black lg:text-2xl">{cat.title}</h1>
-          <p className="text-[12px] font-bold opacity-85">{cat.subtitle} — {items.length} موديل</p>
+          <h1 className="text-xl font-black lg:text-2xl">{cat.title}{brand ? <span dir="ltr"> — {brand}</span> : null}</h1>
+          <p className="text-[12px] font-bold opacity-85">{brand ? `${shown.length} موديل` : `${brands.length} شركات مصنّعة — ${items.length} موديل`}</p>
         </div>
       </header>
-      <div className="stagger-in grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:gap-3 xl:grid-cols-4">
-        {items.map((p) => <ProductCard key={p.id} product={p} onOpen={() => onOpen(p.id)} />)}
+      {brand ? (
+        <div className="stagger-in grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:gap-3 xl:grid-cols-4">
+          {shown.map((p) => <ProductCard key={p.id} product={p} onOpen={() => onOpen(p.id)} />)}
+        </div>
+      ) : (
+        <div className="stagger-in grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {brands.map((b) => {
+            const list = items.filter((p) => brandOf(p) === b);
+            return (
+              <button key={b} type="button" onClick={() => setBrand(b)} className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card text-right shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
+                <span className="grid grid-cols-3 gap-1.5 bg-background p-2">
+                  {list.slice(0, 3).map((p) => (
+                    <img key={p.id} src={p.image} alt={p.name} loading="lazy" className="aspect-square w-full object-contain" />
+                  ))}
+                </span>
+                <span className="flex items-center justify-between border-t border-border/70 px-4 py-3">
+                  <span className="text-lg font-black text-navy" dir="ltr">{b}</span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-brand px-3 py-1 text-xs font-bold text-brand-foreground">
+                    {list.length} موديل <ArrowRight className="size-3.5 rotate-180" />
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** بطاقة «كل المنتجات»: بحث + أزرار الشركات المصنّعة. */
+function AllProductsView({ onOpen, onBack }: { onOpen: (id: string) => void; onBack: () => void }) {
+  const all = useMemo(() => CATEGORIES.flatMap((c) => productsByCategory(c.id)), []);
+  const brands = useMemo(() => Array.from(new Set(all.map(brandOf))), [all]);
+  const [brand, setBrand] = useState<string | null>(null);
+  const [q, setQ] = useState("");
+  useScreenVoice("catalog-all", "كل المنتجات. ابحث باسم المنتج أو الموديل، أو اختر الشركة المصنّعة.");
+  const terms = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const shown = all.filter((p) => {
+    if (brand && brandOf(p) !== brand) return false;
+    const hay = `${p.name} ${p.model} ${p.brand} ${p.power}`.toLowerCase();
+    return terms.every((t) => hay.includes(t));
+  });
+  const chip = (active: boolean) =>
+    `rounded-full border px-3 py-1 text-[11px] font-bold transition lg:text-xs ${active ? "border-navy bg-navy text-white" : "border-border bg-card text-navy hover:bg-muted"}`;
+  return (
+    <div className="screen-enter w-full space-y-4 pb-4">
+      <BackButton onClick={onBack} label="الفئات" />
+      <header className="rounded-2xl bg-navy px-4 py-4 text-white shadow-sm">
+        <h1 className="text-xl font-black lg:text-2xl">كل المنتجات</h1>
+        <p className="text-[12px] font-bold opacity-85">{shown.length} من {all.length} موديل</p>
+      </header>
+      <div className="relative">
+        <Search className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="ابحث بالاسم أو الموديل أو القدرة…"
+          className="w-full rounded-full border border-border bg-card py-2.5 pl-4 pr-9 text-sm text-foreground shadow-sm outline-none focus:border-navy"
+        />
       </div>
+      <div className="flex flex-wrap gap-1.5" dir="ltr">
+        <button type="button" onClick={() => setBrand(null)} className={chip(brand === null)}>All</button>
+        {brands.map((b) => (
+          <button key={b} type="button" onClick={() => setBrand(b)} className={chip(brand === b)}>{b}</button>
+        ))}
+      </div>
+      {shown.length ? (
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:gap-3 xl:grid-cols-4">
+          {shown.map((p) => <ProductCard key={p.id} product={p} onOpen={() => onOpen(p.id)} />)}
+        </div>
+      ) : (
+        <p className="py-10 text-center text-sm text-muted-foreground">لا توجد نتائج مطابقة.</p>
+      )}
     </div>
   );
 }

@@ -157,7 +157,7 @@ export function downloadSldSheet(
   ${titleBlock("2 / 2")}
 </div>
 
-<script>window.onload=function(){setTimeout(function(){window.print()},350)}<\/script>
+<script>window.onload=function(){setTimeout(function(){window.print()},350)}</script>
 </body></html>`;
 
   const w = window.open("", "_blank");

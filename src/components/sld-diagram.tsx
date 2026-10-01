@@ -1777,7 +1777,7 @@ export default function SldDiagram({ params, number, actions }: Props) {
   /** محاكاة تدفق الطاقة المتحركة — قابلة للإيقاف. */
   const [anim, setAnim] = useState(true);
   const [real, setReal] = useState(false);
-  const [theme, setTheme] = useState<SldTheme>("paper");
+  const [theme, setTheme] = useState<SldTheme>("blueprint");
   const [picked, setPicked] = useState<string | null>(null);
   const [fitH, setFitH] = useState<number | null>(null);
   const [flow, setFlow] = useState<SldFlow>("none");

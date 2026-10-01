@@ -5,9 +5,7 @@ import { CATEGORIES, findProduct, matchCompatibleProducts, productsByCategory, q
 import { isVoiceOn, isVoicePlatform, prepareSpeech, silenceNextScreen, speakScreen, speakScreenAfterCurrent, stopSpeaking } from "@/lib/voice-guide";
 import ProductVideoPlayer from "@/components/product-video";
 import { afterVideoNarration, getProductVideo, videoIntroNarration } from "@/lib/product-video";
-import { hasModelDatasheet, openInverterDatasheet, downloadInverterDatasheet } from "@/lib/inverter-datasheet-pdf";
-import { openDatasheetEn, downloadDatasheetEn } from "@/lib/datasheet-pdf-en";
-import { catalogCardTitleAr, catalogCardTitleEn } from "@/lib/catalog-card-title";
+import { officialCatalogUrl } from "@/lib/official-catalogs";
 
 
 // خدمة معلوماتية فقط — لا تحتوي أي زر بيع أو ربط بمسارات عروض الأسعار.
@@ -471,51 +469,26 @@ function ProductDetail({ product, onOpen, onBack, backLabel }: { product: Produc
           </Section>
         )}
         <Section icon={<FileText />} title="الكتالوجات والملفات">
-          {hasModelDatasheet(product) && (
-            <div className="mb-3 space-y-2.5">
-              <div className="rounded-xl border border-brand/40 bg-brand/5 p-3">
-                <h3 className="mb-2 flex items-center gap-2 text-sm font-black text-navy">
-                  <FileText className="size-4 text-brand" /> {catalogCardTitleAr(product)}
-                </h3>
-                <div className="flex gap-1.5">
-                  <button type="button" onClick={() => openInverterDatasheet(product)} className="inline-flex items-center gap-1 rounded-full bg-skyline px-3 py-1 text-xs font-bold text-skyline-foreground transition hover:opacity-90"><Eye className="size-3.5" /> فتح</button>
-                  <button type="button" onClick={() => downloadInverterDatasheet(product)} className="inline-flex items-center gap-1 rounded-full bg-navy-soft px-3 py-1 text-xs font-bold text-navy transition hover:opacity-90"><Download className="size-3.5" /> تحميل</button>
-                </div>
+          {(() => {
+            const en = officialCatalogUrl(product, "en");
+            const ar = officialCatalogUrl(product, "ar");
+            if (!en) return <p className="text-xs text-muted-foreground">لا يتوفر كتالوج رسمي لهذا المنتج حالياً.</p>;
+            const row = (url: string, label: string, dir: "ltr" | "rtl", open: string, dl: string) => (
+              <div dir={dir} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border px-3 py-2">
+                <span className="flex items-center gap-2 text-sm font-bold text-navy"><FileText className="size-4 text-brand" /> {label} <span className="text-xs font-normal text-muted-foreground">(PDF)</span></span>
+                <span className="flex gap-1.5">
+                  <button type="button" onClick={() => setViewFile({ kind: "Datasheet", label, url })} className="inline-flex items-center gap-1 rounded-full bg-skyline px-3 py-1 text-xs font-bold text-skyline-foreground transition hover:opacity-90"><Eye className="size-3.5" /> {open}</button>
+                  <button type="button" onClick={() => downloadFile({ kind: "Datasheet", label, url })} className="inline-flex items-center gap-1 rounded-full bg-navy-soft px-3 py-1 text-xs font-bold text-navy transition hover:opacity-90"><Download className="size-3.5" /> {dl}</button>
+                </span>
               </div>
-              <div className="rounded-xl border border-skyline/40 bg-skyline/5 p-3" dir="ltr">
-                <h3 className="mb-2 flex items-center gap-2 text-sm font-black text-navy">
-                  <FileText className="size-4 text-skyline" /> {catalogCardTitleEn(product)}
-                </h3>
-                <div className="flex gap-1.5">
-                  <button type="button" onClick={() => openDatasheetEn(product)} className="inline-flex items-center gap-1 rounded-full bg-skyline px-3 py-1 text-xs font-bold text-skyline-foreground transition hover:opacity-90"><Eye className="size-3.5" /> Open</button>
-                  <button type="button" onClick={() => downloadDatasheetEn(product)} className="inline-flex items-center gap-1 rounded-full bg-navy-soft px-3 py-1 text-xs font-bold text-navy transition hover:opacity-90"><Download className="size-3.5" /> Download</button>
-                </div>
+            );
+            return (
+              <div className="space-y-2">
+                {row(en, "Official Datasheet (EN)", "ltr", "Open", "Download")}
+                {ar && row(ar, "الكتالوج الرسمي (عربي)", "rtl", "فتح", "تحميل")}
               </div>
-            </div>
-          )}
-          <div className="space-y-3">
-
-            {FILE_GROUPS.map((g) => {
-              const items = product.files.filter((f) => f.kind === g.kind);
-              if (items.length === 0) return null;
-              return (
-                <div key={g.kind}>
-                  <h3 className="mb-1.5 text-xs font-black text-navy">{g.title}</h3>
-                  <ul className="space-y-2">
-                    {items.map((f) => (
-                      <li key={f.url} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border px-3 py-2">
-                        <span className="flex items-center gap-2 text-sm font-bold text-navy"><FileText className="size-4 text-brand" /> {f.label} <span className="text-xs font-normal text-muted-foreground">(PDF)</span></span>
-                        <span className="flex gap-1.5">
-                          <button type="button" onClick={() => setViewFile(f)} className="inline-flex items-center gap-1 rounded-full bg-skyline px-3 py-1 text-xs font-bold text-skyline-foreground transition hover:opacity-90"><Eye className="size-3.5" /> فتح</button>
-                          <button type="button" onClick={() => downloadFile(f)} className="inline-flex items-center gap-1 rounded-full bg-navy-soft px-3 py-1 text-xs font-bold text-navy transition hover:opacity-90"><Download className="size-3.5" /> تحميل</button>
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })}
-          </div>
+            );
+          })()}
           {product.certificates && (
             <div className="mt-3 rounded-lg bg-muted px-3 py-2 text-xs leading-6">
               <span className="font-black text-navy">الشهادات والمعايير المذكورة في الكتالوج: </span>{product.certificates}

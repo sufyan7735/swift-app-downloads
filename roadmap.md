@@ -5,3 +5,5 @@
 - [x] Correct animated day, night, and grid-outage energy-flow scenarios.
 - [x] Expand the SLD canvas to 1560px and redistribute drawing elements.
 - [x] Verify calculations, build health, and responsive desktop/mobile rendering.
+
+- [x] Catalogs: per-value highlight of shown model (EN + AR official PDFs)

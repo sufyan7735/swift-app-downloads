@@ -1,11 +1,24 @@
 import { useMemo, useState } from "react";
-import { BatteryCharging, Check, Columns3, Scale, Sun, TrendingDown, TrendingUp } from "lucide-react";
+import {
+  BatteryCharging,
+  Check,
+  Columns3,
+  Scale,
+  Sun,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
 import { buildPvsystStudy } from "@/lib/pvsyst-engine";
 import { buildEconomics, DEFAULT_TARIFF_USD } from "@/lib/pvsyst-economics";
-import { applyVariantToStudyParams, type SystemVariant, type VariantId } from "@/lib/system-variants";
+import {
+  applyVariantToStudyParams,
+  type SystemVariant,
+  type VariantId,
+} from "@/lib/system-variants";
 import type { View } from "@/lib/present";
 
-const nf = (n: number, d = 0) => n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+const nf = (n: number, d = 0) =>
+  n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
 
 type Props = {
   variants: SystemVariant[];
@@ -17,9 +30,21 @@ type Props = {
 type Metrics = { annual: number | null; saving: number | null; payback: number | null };
 
 const TONE: Record<VariantId, { chip: string; ring: string; icon: typeof TrendingDown }> = {
-  eco: { chip: "bg-skyline text-skyline-foreground", ring: "border-skyline/60 bg-skyline/5", icon: TrendingDown },
-  rec: { chip: "bg-energy text-energy-foreground", ring: "border-energy bg-energy/10", icon: Check },
-  max: { chip: "bg-brand text-brand-foreground", ring: "border-brand/60 bg-brand/5", icon: TrendingUp },
+  eco: {
+    chip: "bg-skyline text-skyline-foreground",
+    ring: "border-skyline/60 bg-skyline/5",
+    icon: TrendingDown,
+  },
+  rec: {
+    chip: "bg-energy text-energy-foreground",
+    ring: "border-energy bg-energy/10",
+    icon: Check,
+  },
+  max: {
+    chip: "bg-brand text-brand-foreground",
+    ring: "border-brand/60 bg-brand/5",
+    icon: TrendingUp,
+  },
 };
 
 /** شريط تبديل البدائل الهندسية ولوحة المقارنة المباشرة داخل عرض السعر الرسمي. */
@@ -93,35 +118,46 @@ export default function QuoteVariants({ variants, active, onPick, study }: Props
               className={`flex h-full flex-col gap-1.5 rounded-xl border-2 p-3 text-right transition hover:-translate-y-0.5 hover:shadow-md ${on ? tone.ring + " shadow-md" : "border-border bg-card"}`}
             >
               <span className="flex items-center gap-2">
-                <span className={`grid size-7 shrink-0 place-items-center rounded-lg [&_svg]:size-3.5 ${tone.chip}`}>
+                <span
+                  className={`grid size-7 shrink-0 place-items-center rounded-lg [&_svg]:size-3.5 ${tone.chip}`}
+                >
                   <Icon />
                 </span>
                 <strong className="text-[13px] font-black leading-5">{variant.title}</strong>
                 {variant.id === "rec" && (
-                  <span className="rounded-full bg-energy/15 px-2 py-0.5 text-[9px] font-black text-energy">معتمد</span>
+                  <span className="rounded-full bg-energy/15 px-2 py-0.5 text-[9px] font-black text-energy">
+                    معتمد
+                  </span>
                 )}
               </span>
-              <span className="text-[10px] font-semibold leading-4 text-muted-foreground">{variant.note}</span>
+              <span className="text-[10px] font-semibold leading-4 text-muted-foreground">
+                {variant.note}
+              </span>
               <span className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-[10px] font-bold text-navy">
                 <span className="inline-flex items-center gap-1">
                   <Sun className="size-3 text-amber-500" /> {nf(variant.kwp, 1)} kWp
                 </span>
                 {variant.batteryKwh > 0 && (
                   <span className="inline-flex items-center gap-1">
-                    <BatteryCharging className="size-3 text-emerald-600" /> {nf(variant.batteryKwh, 1)} kWh
+                    <BatteryCharging className="size-3 text-emerald-600" />{" "}
+                    {nf(variant.batteryKwh, 1)} kWh
                   </span>
                 )}
               </span>
               <span className="flex items-baseline justify-between pt-1">
                 <span className="text-sm font-black text-brand">${nf(variant.total)}</span>
                 {variant.delta !== 0 && (
-                  <span className={`text-[10px] font-black ${variant.delta > 0 ? "text-brand" : "text-energy"}`}>
+                  <span
+                    className={`text-[10px] font-black ${variant.delta > 0 ? "text-brand" : "text-energy"}`}
+                  >
                     {variant.delta > 0 ? "+" : "−"}${nf(Math.abs(variant.delta))}
                   </span>
                 )}
               </span>
               {m?.payback && (
-                <span className="text-[10px] font-semibold text-muted-foreground">استرداد ≈ {nf(m.payback, 1)} سنة</span>
+                <span className="text-[10px] font-semibold text-muted-foreground">
+                  استرداد ≈ {nf(m.payback, 1)} سنة
+                </span>
               )}
             </button>
           );
@@ -143,11 +179,18 @@ export default function QuoteVariants({ variants, active, onPick, study }: Props
             </thead>
             <tbody>
               {[
-                { label: "عدد الألواح", pick: (v: SystemVariant) => (v.panelQty ? `${nf(v.panelQty)} لوح` : "—") },
-                { label: "قدرة الألواح", pick: (v: SystemVariant) => (v.kwp ? `${nf(v.kwp, 1)} kWp` : "—") },
+                {
+                  label: "عدد الألواح",
+                  pick: (v: SystemVariant) => (v.panelQty ? `${nf(v.panelQty)} لوح` : "—"),
+                },
+                {
+                  label: "قدرة الألواح",
+                  pick: (v: SystemVariant) => (v.kwp ? `${nf(v.kwp, 1)} kWp` : "—"),
+                },
                 {
                   label: "سعة التخزين",
-                  pick: (v: SystemVariant) => (v.batteryKwh ? `${nf(v.batteryKwh, 1)} kWh` : "بدون بطاريات"),
+                  pick: (v: SystemVariant) =>
+                    v.batteryKwh ? `${nf(v.batteryKwh, 1)} kWh` : "بدون بطاريات",
                 },
                 {
                   label: "الإنتاج السنوي",
@@ -159,7 +202,10 @@ export default function QuoteVariants({ variants, active, onPick, study }: Props
                 { label: "تكلفة المنظومة", pick: (v: SystemVariant) => `$${nf(v.total)}` },
                 {
                   label: "فارق الاستثمار",
-                  pick: (v: SystemVariant) => (v.delta === 0 ? "المرجع" : `${v.delta > 0 ? "+" : "−"}$${nf(Math.abs(v.delta))}`),
+                  pick: (v: SystemVariant) =>
+                    v.delta === 0
+                      ? "المرجع"
+                      : `${v.delta > 0 ? "+" : "−"}$${nf(Math.abs(v.delta))}`,
                 },
                 {
                   label: "الوفر السنوي",
@@ -177,7 +223,9 @@ export default function QuoteVariants({ variants, active, onPick, study }: Props
                 },
               ].map((row) => (
                 <tr key={row.label} className="odd:bg-muted/20">
-                  <td className="border-b border-border p-2 font-bold text-muted-foreground">{row.label}</td>
+                  <td className="border-b border-border p-2 font-bold text-muted-foreground">
+                    {row.label}
+                  </td>
                   {variants.map((v) => (
                     <td
                       key={v.id}

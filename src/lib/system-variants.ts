@@ -33,9 +33,27 @@ const BATTERY_RE = /(بطار|battery|lifepo|ليثيوم)/i;
 const PANEL_LINKED_RE = /(هيكل|هياكل|قواعد|قاعدة|حوامل|حامل|structure|استركشر|mc4|موصل)/i;
 
 const PRESETS: { id: VariantId; title: string; note: string; pv: number; bat: number }[] = [
-  { id: "eco", title: "الخيار الاقتصادي", note: "أقل تكلفة تأسيسية مع تغطية نهارية كاملة", pv: 0.82, bat: 0.6 },
-  { id: "rec", title: "الموصى به", note: "التوازن المعتمد بين التكلفة والاستقلالية", pv: 1, bat: 1 },
-  { id: "max", title: "أقصى استقلالية", note: "أكبر تخزين وإنتاج لتغطية الانقطاعات الطويلة", pv: 1.3, bat: 1.8 },
+  {
+    id: "eco",
+    title: "الخيار الاقتصادي",
+    note: "أقل تكلفة تأسيسية مع تغطية نهارية كاملة",
+    pv: 0.82,
+    bat: 0.6,
+  },
+  {
+    id: "rec",
+    title: "الموصى به",
+    note: "التوازن المعتمد بين التكلفة والاستقلالية",
+    pv: 1,
+    bat: 1,
+  },
+  {
+    id: "max",
+    title: "أقصى استقلالية",
+    note: "أكبر تخزين وإنتاج لتغطية الانقطاعات الطويلة",
+    pv: 1.3,
+    bat: 1.8,
+  },
 ];
 
 function num(value: unknown): number {
@@ -90,7 +108,9 @@ export function buildVariants(source: VariantSource): SystemVariant[] | null {
   const baseTotal = items.reduce((sum, i) => sum + num(i.total), 0);
 
   const variants = PRESETS.map((preset) => {
-    const panelQty = panelItem ? roundTo(num(panelItem.qty) * preset.pv, perString > 1 ? perString : 1) : 0;
+    const panelQty = panelItem
+      ? roundTo(num(panelItem.qty) * preset.pv, perString > 1 ? perString : 1)
+      : 0;
     const batteryQty = batteryItem ? Math.max(1, Math.round(num(batteryItem.qty) * preset.bat)) : 0;
     const panelRatio = panelItem && num(panelItem.qty) > 0 ? panelQty / num(panelItem.qty) : 1;
 

@@ -454,9 +454,9 @@ export function afterVideoNarration(p: {
       .replace(/\s+(حتى|بجهد|بقدرة|بسعة|و)\s*$/g, "").replace(/\s{2,}/g, " ").trim();
   const words = (s: string) => s.split(" ").length;
   const use = (p.uses ?? []).map(clean).find((u) => u.length > 4 && words(u) <= 8) ?? "";
-  const feature = (p.features ?? []).map(clean).find((f) => f.length > 6 && words(f) <= 7) ?? "";
-  const first = use ? `مناسب لـ${use}.` : "";
-  const second = feature ? `ويتميز بـ${feature}.` : "";
+  const feature = (p.features ?? []).filter((f) => !/[\d٠-٩A-Za-z×:]/.test(f.split(/[،.]/)[0]!)).map(clean).find((f) => f.length > 6 && words(f) <= 7) ?? "";
+  const first = use ? `مناسب لـ ${use}.` : "";
+  const second = feature ? `ومن أبرز مزاياه: ${feature}.` : "";
   return [first, second].filter(Boolean).join(" ");
 }
 

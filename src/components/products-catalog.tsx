@@ -262,6 +262,24 @@ function AllProductsView({ onOpen, onBack }: { onOpen: (id: string) => void; onB
   );
 }
 
+function brandLabel(b: string) {
+  if (/hithium|heroee/i.test(b)) return "HiTHIUM";
+  return b;
+}
+
+function BrandBadge({ brand, large = false }: { brand: string; large?: boolean }) {
+  return (
+    <span dir="ltr" className="pointer-events-none absolute left-2 top-2 z-10 flex flex-col items-start gap-1">
+      <span className={`rounded-md border border-border/70 bg-card/90 font-black tracking-wide text-navy shadow-sm backdrop-blur ${large ? "px-3 py-1.5 text-base" : "px-2 py-1 text-[11px]"}`}>
+        {brandLabel(brand)}
+      </span>
+      <span className={`ms-1 flex items-center rounded-full border border-border/60 bg-card shadow-lg ${large ? "px-2 py-1" : "px-1.5 py-0.5"}`}>
+        <img src="/brand/actes-logo.png" alt="ACTES" className={large ? "h-5 w-auto" : "h-3 w-auto"} />
+      </span>
+    </span>
+  );
+}
+
 function ProductCard({ product, onOpen }: { product: Product; onOpen: () => void }) {
   // نبدأ تحضير الشرح الصوتي قبل فتح المنتج، حتى ينطلق مع الفيديو بلا انتظار.
   const warm = () => {
@@ -274,7 +292,8 @@ function ProductCard({ product, onOpen }: { product: Product; onOpen: () => void
       onTouchStart={warm}
       className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card text-right shadow-sm transition hover:shadow-md"
     >
-      <button type="button" onClick={() => { warm(); onOpen(); }} aria-label={product.name} className="block aspect-[4/5] w-full overflow-hidden bg-background">
+      <button type="button" onClick={() => { warm(); onOpen(); }} aria-label={product.name} className="relative block aspect-[4/5] w-full overflow-hidden bg-background">
+        <BrandBadge brand={product.brand} />
         <img src={product.image} alt={product.name} loading="lazy" decoding="async" width={800} height={1000} className="size-full scale-105 object-contain p-1 transition duration-500 group-hover:scale-110" />
       </button>
 
@@ -496,7 +515,8 @@ function ProductDetail({ product, onOpen, onBack, backLabel }: { product: Produc
 
 
       <section className="grid gap-4 rounded-2xl border border-border bg-card p-3 shadow-sm md:grid-cols-[minmax(0,3fr)_minmax(0,3fr)] lg:p-5">
-        <div className="overflow-hidden rounded-xl border border-border/70 bg-background">
+        <div className="relative overflow-hidden rounded-xl border border-border/70 bg-background">
+          <BrandBadge brand={product.brand} large />
           <img src={product.image} alt={product.name} width={1200} height={1200} className="aspect-square w-full scale-105 object-contain p-1.5" />
         </div>
         <div className="flex flex-col gap-3">

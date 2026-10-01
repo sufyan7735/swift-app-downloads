@@ -95,6 +95,9 @@ const SITES: { keys: string[]; site: Site }[] = [
   { keys: ["سقطرى", "سقطري", "حديبو"], site: { climate: "island", tiltDeg: 13, lat: 12.5 } },
 ];
 
+/** أسماء المواقع المعتمدة في بيانات المناخ (الاسم الأول لكل موقع). */
+export const STUDY_SITE_NAMES: string[] = SITES.map((entry) => entry.keys[0] as string);
+
 function findSite(city: string): Site | null {
   const key = String(city || "").trim();
   if (!key) return null;

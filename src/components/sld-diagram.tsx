@@ -632,7 +632,15 @@ export function SldSvg({
   const dcY = busY;
   const powerOutX = xInv + wInv;
   const backup = Boolean(bat && inv);
-  const loadY = backup ? dcY + 86 : m.grid ? dcY + 34 : dcY;
+  // مسار EPS يمرّ أسفل مجموعة الإنفرترات ولوحة الـ AC حتى لا يعبر الصناديق
+  const loadY = backup
+    ? Math.max(dcY + 86, invY + invH + 40)
+    : m.grid
+      ? dcY + 34
+      : dcY;
+  /** صندوق لوحة الـ AC بارتفاع ثابت متوسّط المحور عند تعدد الإنفرترات. */
+  const acBoxH = multiInv ? 150 : invH + 12;
+  const acBoxY = multiInv ? dcY - acBoxH / 2 : invY - 6;
   const batteryRiserX = xInv + wInv / 2;
   const mainFromX = m.ats && ac ? xAts + wAts : ac ? xAc + wAc : powerOutX;
 
@@ -1182,7 +1190,13 @@ export function SldSvg({
                   color={C.dc}
                 />
                 <VoltageDropBadge x={riser - 70} y={batY + 50} calc={calc("W3")} />
-                <text x={riser + 6} y={invY + invH + 26} fontFamily={F} fontSize={7.6} fill={C.dc}>
+                <text
+                  x={riser + 8}
+                  y={(invY + invH + batY) / 2}
+                  fontFamily={F}
+                  fontSize={7.6}
+                  fill={C.dc}
+                >
                   BAT
                 </text>
               </g>
@@ -1199,9 +1213,9 @@ export function SldSvg({
             <Node x={xAc} y={dcY} color={C.ac} />
             <Block
               x={xAc}
-              y={invY - 6}
+              y={acBoxY}
               w={wAc}
-              h={invH + 12}
+              h={acBoxH}
               title="AC PROTECTION BOARD"
               lines={[
                 `Main ${ac.breakerA} A ${ac.phase3 ? "4P" : "2P"} — IP54`,
@@ -1231,9 +1245,9 @@ export function SldSvg({
             <Node x={xAts} y={dcY} color={C.ac} />
             <Block
               x={xAts}
-              y={invY}
+              y={acBoxY + 6}
               w={wAts}
-              h={invH}
+              h={acBoxH - 12}
               title="ATS CHANGEOVER"
               lines={[
                 "Grid / Generator",
@@ -1643,7 +1657,7 @@ export function SldSvg({
             const bonds: { x: number; label: string }[] = [
               { x: xPv + 60, label: "ARRAY FRAMES 6 mm²" },
               ...(dc ? [{ x: xDc + wDc / 2, label: "DC BOARD + SPD" }] : []),
-              ...(bat ? [{ x: xInv - 244, label: "BATTERY RACK" }] : []),
+              ...(bat ? [{ x: xInv - 80, label: "BATTERY RACK" }] : []),
               ...(inv ? [{ x: xInv + wInv / 2, label: "INVERTER CHASSIS" }] : []),
               ...(ac ? [{ x: xAc + wAc / 2, label: "AC BOARD + SPD" }] : []),
               ...(m.ats ? [{ x: xAts + wAts / 2, label: "ATS ENCLOSURE" }] : []),

@@ -35,18 +35,26 @@ export default function EconomicStudy({ study, actions }: Props) {
   const [dieselPrice, setDieselPrice] = useState(1.1);
   const [escalation, setEscalation] = useState(TARIFF_ESCALATION * 100);
   const [tableOpen, setTableOpen] = useState(false);
+  // عند صدور عرض السعر قبل تحديد الموقع، تُحدد المحافظة هنا لاعتماد بيانات المناخ الصحيحة
+  const [sitePick, setSitePick] = useState("");
 
   const fallback = useMemo(
     () => ({
-      city: study.city,
+      city: sitePick || study.city,
       customer: study.customer,
       reference: study.number,
       monthlyConsumption: study.monthlyConsumption,
     }),
-    [study],
+    [study, sitePick],
   );
 
-  const result = useMemo(() => buildPvsystStudy(study.params, fallback), [study.params, fallback]);
+  const params = useMemo(() => {
+    const base = (study.params || null) as Record<string, unknown> | null;
+    if (!base || !sitePick) return base;
+    return { ...base, city: sitePick };
+  }, [study.params, sitePick]);
+
+  const result = useMemo(() => buildPvsystStudy(params, fallback), [params, fallback]);
   const quoteCapex = useMemo(
     () => capexFromQuoteItems((study.params as Record<string, unknown> | null)?.["quote_items"]),
     [study.params],
@@ -69,7 +77,31 @@ export default function EconomicStudy({ study, actions }: Props) {
   const scenarios = useMemo(() => scenarioAnalysis(input), [input]);
   const equiv = useMemo(() => environmentalEquivalents(eco?.co2PerYear ?? 0), [eco]);
 
-  if (!result || !eco) return null;
+  if (!result || !eco) {
+    return (
+      <div className="space-y-5">
+        <div className="rounded-lg border border-border bg-soft p-5">
+          <h3 className="text-base font-extrabold text-navy">حدد موقع المشروع لإظهار دراسة الجدوى</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            العائد وفترة الاسترداد تُحسب من إنتاجية المنظومة في موقعها، فاختر المحافظة المعتمدة لبيانات الإشعاع الشمسي.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {STUDY_SITE_NAMES.map((name) => (
+              <button
+                key={name}
+                type="button"
+                onClick={() => setSitePick(name)}
+                className="rounded-full border border-border bg-card px-4 py-2 text-sm font-bold text-navy transition hover:border-brand hover:text-brand"
+              >
+                {name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const s = result.system;
   const months = result.months;
 

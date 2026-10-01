@@ -1729,9 +1729,9 @@ function QuoteWorkspace({ view, session, step, draft, setDraft, onPick, onBack, 
 const QUOTE_ACTIONS: { id: string; title: string; note: string; icon: ReactNode; className: string; chip: string }[] = [
   { id: "aq_buy", title: "متابعة الشراء", note: "إتمام طلب المنظومة", icon: <ShoppingCart />, className: "bg-energy text-energy-foreground", chip: "bg-energy-foreground/20" },
   { id: "sales_contact", title: "التواصل مع المبيعات", note: "استفسار أو عرض رسمي", icon: <Headphones />, className: "border border-border bg-soft text-foreground", chip: "bg-brand/10 text-brand" },
-  { id: "aq_study", title: "دراسة PVsyst", note: "دراسة إنتاجية تفصيلية", icon: <LineChart />, className: "bg-skyline text-skyline-foreground", chip: "bg-skyline-foreground/20" },
-  { id: "aq_eco", title: "دراسة الجدوى الاقتصادية", note: "العائد والاسترداد والوفر البيئي", icon: <BadgeDollarSign />, className: "bg-emerald-600 text-white", chip: "bg-white/20" },
-  { id: "aq_sld", title: "مخطط SLD", note: "المخطط الكهربائي الأحادي", icon: <Network />, className: "bg-field text-field-foreground", chip: "bg-field-foreground/15" },
+  { id: "aq_study", title: "دراسة PVsyst", note: "دراسة إنتاجية تفصيلية", icon: <LineChart />, className: "border border-border bg-card text-foreground", chip: "bg-skyline text-skyline-foreground" },
+  { id: "aq_eco", title: "دراسة الجدوى الاقتصادية", note: "العائد والاسترداد والوفر البيئي", icon: <BadgeDollarSign />, className: "border border-border bg-card text-foreground", chip: "bg-emerald-600 text-white" },
+  { id: "aq_sld", title: "مخطط SLD", note: "المخطط الكهربائي الأحادي", icon: <Network />, className: "border border-border bg-card text-foreground", chip: "bg-field text-field-foreground" },
 ];
 
 function QuoteActions({ onPick, hideEngineering = false, onEco }: { onPick: (value: string) => void; hideEngineering?: boolean; onEco?: (() => void) | undefined }) {

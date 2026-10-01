@@ -6,6 +6,7 @@ import {
   Download,
   Expand,
   FileDown,
+  Headphones,
   ImageDown,
   LineChart,
   Minus,

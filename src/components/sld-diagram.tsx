@@ -1807,7 +1807,8 @@ export function SldSvg({
             </text>
           </g>
         );
-      })()}
+        })()}
+      </PhotoCtx.Provider>
     </svg>
   );
 }

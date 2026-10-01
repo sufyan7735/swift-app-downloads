@@ -5496,7 +5496,9 @@ export function runStateMachine(__session, __parsed, __itemPrices) {
   // دراسة PVsyst لا تُرسل تلقائياً مع عرض السعر تُرسل فقط بعد سؤال العميل وموافقته (خطوة study_ask / pv_study_ask)
 
   // ===================== معاملات دراسة PVsyst للمنظومة المختارة =====================
-  if (send_study_file && !pv_flow) {
+  // تُبنى معاملات الدراسة أيضاً مع صدور عرض السعر الرسمي حتى يتوفر زر دراسة الجدوى الاقتصادية فوراً
+  var __buildStudy = (send_study_file || send_quote_file);
+  if (__buildStudy && !pv_flow) {
     try {
       if (menu_choice === '2') {
         // الدراسة تقرأ نفس قرار المنظومة الموحد (بدون إعادة اختيار)
@@ -5511,6 +5513,7 @@ export function runStateMachine(__session, __parsed, __itemPrices) {
         } else {
           study_params = null;
           send_study_file = false;
+          __buildStudy = false;
         }
       } else {
         var spCode = (system_type && RES_QUOTE_NUM[system_type]) ? system_type : (((lookupByBill(parseFloat(monthly_consumption), '1') || {}).code) || 'r1');
@@ -5637,7 +5640,7 @@ export function runStateMachine(__session, __parsed, __itemPrices) {
 
   // ===== لقطة مواصفات المنظومة الفعلية لعرض دراسة PVsyst =====
   // نفس بيانات المنظومة المستخدمة في المخطط وعرض السعر (لا تُخترع أي قيمة هنا)
-  if (send_study_file && study_params && !study_params.system) {
+  if (__buildStudy && study_params && !study_params.system) {
     try {
       var __ssys = buildSldParams();
       if (__ssys && __ssys.panel && __ssys.inv) {

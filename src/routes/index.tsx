@@ -10,6 +10,9 @@ import { preloadAppImages } from "@/lib/preload-images";
 import PvsystStudy from "@/components/pvsyst-study";
 import EconomicStudy from "@/components/economic-study";
 import SldDiagram from "@/components/sld-diagram";
+import QuoteVariants from "@/components/quote-variants";
+import { applyVariantToSldParams, applyVariantToStudyParams, buildVariants, type VariantId } from "@/lib/system-variants";
+
 
 import { enterFullscreen, isFullscreen, toggleFullscreen } from "@/lib/fullscreen";
 import actesSplashLogo from "@/assets/actes-logo-white.webp";

@@ -447,14 +447,17 @@ export function afterVideoNarration(p: {
   suitableFor?: string;
   features?: string[];
 }) {
+  // جملتان قصيرتان فقط: الاستخدام الأبرز، ثم ميزة واحدة — بلا أرقام أو رموز أو أقواس.
   const clean = (s: string) =>
-    s.replace(/[\d٠-٩]+[^،.]*/g, "").replace(/\s{2,}/g, " ").replace(/^[،\s]+|[،\s]+$/g, "").trim();
-  const uses = (p.uses ?? []).map(clean).filter((u) => u.length > 2).slice(0, 3).join("، ");
-  const suitable = clean(p.suitableFor ?? "");
-  const feature = (p.features ?? []).map(clean).find((f) => f.length > 6) ?? "";
-  const first = uses ? `حل مناسب لـ ${uses}.` : suitable ? `${suitable}.` : "";
-  const second = feature ? `${feature}.` : uses && suitable ? `${suitable}.` : "";
-  return [first, second].filter(Boolean).join(" ").replace(/\.\./g, ".");
+    s.replace(/\([^)]*\)/g, "").split(/[،.]/)[0]!
+      .replace(/[\d٠-٩%]+/g, "").replace(/[A-Za-z+\-/]+/g, "")
+      .replace(/\s+(حتى|بجهد|بقدرة|بسعة|و)\s*$/g, "").replace(/\s{2,}/g, " ").trim();
+  const words = (s: string) => s.split(" ").length;
+  const use = (p.uses ?? []).map(clean).find((u) => u.length > 4 && words(u) <= 8) ?? "";
+  const feature = (p.features ?? []).map(clean).find((f) => f.length > 6 && words(f) <= 7) ?? "";
+  const first = use ? `مناسب لـ${use}.` : "";
+  const second = feature ? `ويتميز بـ${feature}.` : "";
+  return [first, second].filter(Boolean).join(" ");
 }
 
 

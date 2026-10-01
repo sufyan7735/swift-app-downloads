@@ -79,9 +79,7 @@ export function awgForArea(area: number | null): string | null {
 /** بدائل منطقية حول المقاس التصميمي مع إبقاء كامل المجال الهندسي متاحاً. */
 export function cableSizeOptions(area: number | null): CableSizeOption[] {
   if (!area) return [];
-  const baseline = CABLE_SIZE_OPTIONS.findIndex((option) => option.area >= area);
-  const from = Math.max(0, (baseline < 0 ? CABLE_SIZE_OPTIONS.length - 1 : baseline) - 2);
-  return CABLE_SIZE_OPTIONS.slice(from);
+  return CABLE_SIZE_OPTIONS;
 }
 
 /** يحدّث أول مقطع ظاهر في وصف الكابل مع الحفاظ على تكوين وعدد الموصلات. */

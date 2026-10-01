@@ -792,9 +792,9 @@ export function SldSvg({
                 <line x1={xOut - 26} y1={dcY} x2={xOut - 26} y2={dcY - 50} stroke={C.ac} strokeWidth={2} />
                 <line x1={xOut - 26} y1={dcY - 50} x2={xOut} y2={dcY - 50} stroke={C.ac} strokeWidth={2} markerEnd="url(#sld-arrow)" />
                 <Node x={xOut - 26} y={dcY} color={C.ac} />
-                <PhaseMark x={(from + xOut) / 2 - 30} y={dcY} phase3={phase3} />
-                <WireTag x={(from + xOut) / 2 - 56} y={dcY - 8} text="W5" color={C.ac} />
-                <VoltageDropBadge x={(from + xOut) / 2 - 56} y={dcY + 28} calc={calc("W5")} />
+                {backup && <PhaseMark x={(from + xOut) / 2 - 30} y={dcY} phase3={phase3} />}
+                {backup && <WireTag x={(from + xOut) / 2 - 56} y={dcY - 8} text="W5" color={C.ac} />}
+                {backup && <VoltageDropBadge x={(from + xOut) / 2 - 56} y={dcY + 28} calc={calc("W5")} />}
                 {m.meter && (
                   <g style={pick ? { cursor: "pointer" } : undefined} onClick={pick ? () => pick("meter") : undefined}>
                     <MeterSymbol x={mx} y={dcY} />
@@ -889,12 +889,22 @@ export function SldSvg({
         const batOn = Boolean(bat && inv);
         const charging = flow === "day";
         const flowClass = (reverse = false) => anim ? (reverse ? "sldFlowR" : "sldFlow") : "sldFlowPaused";
+        const multiCy = (u: number) => invY + u * (invUnitH + invGap) + invUnitH / 2;
+        const multiTrunkX = dcOutX + 30;
+        const multiAcBusX = xInv + wInv + 10;
         return (
           <g pointerEvents="none">
             {pvOn && (
               <>
                 <path d={`M ${xPv + 90} ${busY} L ${dc ? xDc : xInv} ${busY}`} className={flowClass()} stroke={C.dc} />
-                <path d={`M ${dcOutX} ${dcY} L ${xInv} ${dcY}`} className={flowClass()} stroke={C.dc} />
+                {multiInv ? (
+                  <>
+                    <path d={`M ${dcOutX} ${dcY} L ${multiTrunkX} ${dcY} L ${multiTrunkX} ${multiCy(drawnInv - 1)}`} className={flowClass()} stroke={C.dc} />
+                    {Array.from({ length: drawnInv }).map((_, u) => (
+                      <path key={`flow-dc-${u}`} d={`M ${multiTrunkX} ${multiCy(u)} L ${xInv} ${multiCy(u)}`} className={flowClass()} stroke={C.dc} />
+                    ))}
+                  </>
+                ) : <path d={`M ${dcOutX} ${dcY} L ${xInv} ${dcY}`} className={flowClass()} stroke={C.dc} />}
               </>
             )}
             {batOn && (
@@ -905,11 +915,14 @@ export function SldSvg({
               />
             )}
             {backup && (
-              <path
-                d={`M ${xInv + wInv} ${dcY + 30} L ${xInv + wInv + 18} ${dcY + 30} L ${xInv + wInv + 18} ${loadY} L ${xOut} ${loadY}`}
-                className={flowClass()}
-                stroke={C.ac}
-              />
+              <>
+                {multiInv && <path d={`M ${multiAcBusX} ${multiCy(0)} L ${multiAcBusX} ${multiCy(drawnInv - 1)}`} className={flowClass()} stroke={C.ac} />}
+                <path
+                  d={`M ${xInv + wInv} ${dcY + 30} L ${xInv + wInv + 18} ${dcY + 30} L ${xInv + wInv + 18} ${loadY} L ${xOut} ${loadY}`}
+                  className={flowClass()}
+                  stroke={C.ac}
+                />
+              </>
             )}
             {!backup && ac && flow !== "outage" && (
                 <path d={`M ${xInv + wInv} ${dcY} L ${xOut - 26} ${dcY} L ${xOut - 26} ${loadY} L ${xOut} ${loadY}`} className={flowClass()} stroke={C.ac} />

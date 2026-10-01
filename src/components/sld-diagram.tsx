@@ -106,6 +106,14 @@ export type SldTheme = keyof typeof THEMES;
 
 const F = "'Segoe UI', 'Tahoma', sans-serif";
 
+/**
+ * وضع العرض الفوتوغرافي: عند تشغيله يختفي المخطط الرسمي ورموزه التخطيطية
+ * بالكامل ولا يبقى إلا مشهد المعدات الواقعية ومسارات الكابلات.
+ */
+const PhotoCtx = createContext(false);
+/** true عندما يجب إخفاء أي رمز أو شارة تخطيطية (وضع فوتوغرافي). */
+const useHideSchematic = () => useContext(PhotoCtx);
+
 type SldActions = {
   onBuy: () => void;
   onSales: () => void;

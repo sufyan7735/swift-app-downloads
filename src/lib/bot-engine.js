@@ -5640,7 +5640,7 @@ export function runStateMachine(__session, __parsed, __itemPrices) {
 
   // ===== لقطة مواصفات المنظومة الفعلية لعرض دراسة PVsyst =====
   // نفس بيانات المنظومة المستخدمة في المخطط وعرض السعر (لا تُخترع أي قيمة هنا)
-  if (send_study_file && study_params && !study_params.system) {
+  if (__buildStudy && study_params && !study_params.system) {
     try {
       var __ssys = buildSldParams();
       if (__ssys && __ssys.panel && __ssys.inv) {

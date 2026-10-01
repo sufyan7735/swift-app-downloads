@@ -354,8 +354,8 @@ function Block({
     const SC = 1.3;
     const cx = x + w / 2;
     const cy = y + (h - 14) / 2;
-    const label = `${title}${lines[0] ? ` — ${lines[0]}` : ""}`;
-    const lw = Math.max(w + 24, label.length * 4.6);
+    const label = title;
+    const lw = label.length * 4.9 + 16;
     return (
       <g
         style={clickable ? { cursor: "pointer" } : undefined}

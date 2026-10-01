@@ -8,3 +8,5 @@
 
 - [x] Catalogs: per-value highlight of shown model (EN + AR official PDFs)
 - [x] Home partners strip: real Li-Power logo + each partner links to official site
+- [x] Rebuild Arabic official catalogs with accurate engineering translation and correct RTL
+- [x] Remove model highlighting from all catalogs (user cancelled it)

@@ -43,6 +43,10 @@ const THEMES = {
     "--sld-fill": "#ffffff",
     "--sld-band": "#eef2f7",
     "--sld-brand": "#e2231a",
+    "--sld-ok": "#167544",
+    "--sld-ok-bg": "#e9f8ef",
+    "--sld-warn": "#b4231f",
+    "--sld-warn-bg": "#fff0ee",
   },
   blueprint: {
     "--sld-dc": "#ff9a93",
@@ -56,6 +60,10 @@ const THEMES = {
     "--sld-fill": "#0b2545",
     "--sld-band": "#14355f",
     "--sld-brand": "#ff8078",
+    "--sld-ok": "#7ce5a7",
+    "--sld-ok-bg": "#123f38",
+    "--sld-warn": "#ff9a93",
+    "--sld-warn-bg": "#512b37",
   },
 } as const;
 
@@ -365,6 +373,11 @@ export function SldSvg({
   // نقطة مخرج الألواح / مدخل الإنفرتر بحسب وجود لوحة الـ DC
   const dcOutX = dc ? xDc + wDc : xPv + wPv;
   const dcY = busY;
+  const powerOutX = xInv + wInv;
+  const backup = Boolean(bat && inv);
+  const loadY = backup ? dcY + 86 : m.grid ? dcY + 34 : dcY;
+  const batteryRiserX = xInv + wInv / 2;
+  const mainFromX = m.ats && ac ? xAts + wAts : ac ? xAc + wAc : powerOutX;
 
   return (
     <svg
@@ -381,7 +394,7 @@ export function SldSvg({
         </marker>
         <style>{`
           @keyframes sldFlowDash { to { stroke-dashoffset: -24; } }
-          .sldFlow, .sldFlowR {
+          .sldFlow, .sldFlowR, .sldFlowPaused {
             fill: none;
             stroke-width: 4;
             stroke-linecap: round;
@@ -390,6 +403,7 @@ export function SldSvg({
             animation: sldFlowDash 0.85s linear infinite;
           }
           .sldFlowR { animation-direction: reverse; }
+          .sldFlowPaused { animation: none; opacity: 0.72; }
           @media (prefers-reduced-motion: reduce) { .sldFlow, .sldFlowR { animation: none; } }
         `}</style>
       </defs>
@@ -489,13 +503,12 @@ export function SldSvg({
         </>
       )}
       {!dc && pv && inv && <line x1={xPv + wPv} y1={dcY} x2={xInv} y2={dcY} stroke={C.dc} strokeWidth={2} />}
+      {dc && pv && <VoltageDropBadge x={(xPv + wPv + xDc) / 2} y={dcY - 22} calc={calc("W1")} />}
       {m.cables[0] && (
-        <WireTag
-          x={(dcOutX + xInv) / 2}
-          y={dcY - 6}
-          text={`${m.cables.find((c) => /MPPT/.test(c.route))?.tag || "W1"}${drop("W2") || drop("W1")}`}
-          color={C.dc}
-        />
+        <>
+          <WireTag x={(dcOutX + xInv) / 2} y={dcY - 8} text={dc ? "W2" : "W1"} color={C.dc} />
+          <VoltageDropBadge x={(dcOutX + xInv) / 2} y={dcY + 29} calc={calc(dc ? "W2" : "W1")} />
+        </>
       )}
       {pv && inv && (
         <>
@@ -685,7 +698,8 @@ export function SldSvg({
             <line x1={riser} y1={batY} x2={riser} y2={invY + invH} stroke={C.dc} strokeWidth={2} />
             <Node x={riser} y={batY} color={C.dc} />
             <Node x={riser} y={invY + invH} color={C.dc} />
-            <WireTag x={riser + 26} y={batY - 8} text={`${m.cables.find((c) => /BAT/.test(c.route))?.tag || "W3"}${drop("W3")}`} color={C.dc} />
+            <WireTag x={riser + 26} y={batY - 8} text={m.cables.find((c) => /BAT/.test(c.route))?.tag || "W3"} color={C.dc} />
+            <VoltageDropBadge x={riser + 62} y={batY + 20} calc={calc("W3")} />
             <text x={riser + 6} y={invY + invH + 26} fontFamily={F} fontSize={7.6} fill={C.dc}>BAT</text>
           </g>
         );
@@ -695,7 +709,8 @@ export function SldSvg({
       {ac && inv && (
         <>
           <line x1={xInv + wInv} y1={dcY} x2={xAc} y2={dcY} stroke={C.ac} strokeWidth={2} />
-          <WireTag x={(xInv + wInv + xAc) / 2} y={dcY - 6} text={`W4${drop("W4")}`} color={C.ac} />
+          <WireTag x={(xInv + wInv + xAc) / 2} y={dcY - 8} text="W4" color={C.ac} />
+          <VoltageDropBadge x={(xInv + wInv + xAc) / 2} y={dcY + 28} calc={calc("W4")} />
           <PhaseMark x={(xInv + wInv + xAc) / 2} y={dcY} phase3={phase3} />
           <Node x={xAc} y={dcY} color={C.ac} />
           <Block
@@ -747,9 +762,7 @@ export function SldSvg({
 
       {/* ── الشبكة والأحمال ──────────────────────────────────────────────── */}
       {(() => {
-        const from = m.ats && ac ? xAts + wAts : ac ? xAc + wAc : inv ? xInv + wInv : xAc;
-        const backup = Boolean(bat && inv);
-        const loadY = backup ? dcY + 86 : m.grid ? dcY + 34 : dcY;
+        const from = mainFromX;
         const mx = xOut - 62;
         return (
           <>
@@ -768,12 +781,20 @@ export function SldSvg({
                   active={active === "grid"}
                   art="grid" real={real}
                 />
-                <line x1={from} y1={dcY} x2={xOut - 26} y2={dcY} stroke={C.ac} strokeWidth={2} />
+                {flow === "outage" ? (
+                  <>
+                    <line x1={from} y1={dcY} x2={xOut - 78} y2={dcY} stroke={C.ac} strokeWidth={2} />
+                    <line x1={xOut - 58} y1={dcY} x2={xOut - 26} y2={dcY} stroke={C.ac} strokeWidth={2} />
+                    <line x1={xOut - 78} y1={dcY} x2={xOut - 61} y2={dcY - 13} stroke={C.dc} strokeWidth={2.4} />
+                    <circle cx={xOut - 58} cy={dcY} r={3} fill={C.dc} />
+                  </>
+                ) : <line x1={from} y1={dcY} x2={xOut - 26} y2={dcY} stroke={C.ac} strokeWidth={2} />}
                 <line x1={xOut - 26} y1={dcY} x2={xOut - 26} y2={dcY - 50} stroke={C.ac} strokeWidth={2} />
                 <line x1={xOut - 26} y1={dcY - 50} x2={xOut} y2={dcY - 50} stroke={C.ac} strokeWidth={2} markerEnd="url(#sld-arrow)" />
                 <Node x={xOut - 26} y={dcY} color={C.ac} />
                 <PhaseMark x={(from + xOut) / 2 - 30} y={dcY} phase3={phase3} />
-                <WireTag x={(from + xOut) / 2 - 56} y={dcY - 6} text={`W5${drop("W5")}`} color={C.ac} />
+                <WireTag x={(from + xOut) / 2 - 56} y={dcY - 8} text="W5" color={C.ac} />
+                <VoltageDropBadge x={(from + xOut) / 2 - 56} y={dcY + 28} calc={calc("W5")} />
                 {m.meter && (
                   <g style={pick ? { cursor: "pointer" } : undefined} onClick={pick ? () => pick("meter") : undefined}>
                     <MeterSymbol x={mx} y={dcY} />
@@ -812,7 +833,8 @@ export function SldSvg({
                 <line x1={xInv + wInv + 18} y1={loadY} x2={xOut} y2={loadY} stroke={C.ac} strokeWidth={wEps} markerEnd="url(#sld-arrow)" />
                 <Node x={xInv + wInv} y={dcY + 30} color={C.ac} />
                 <PhaseMark x={(xInv + wInv + xOut) / 2 + 40} y={loadY} phase3={phase3} />
-                <WireTag x={(xInv + wInv + xOut) / 2 - 40} y={loadY - 6} text={`W6 — EPS BACKUP${drop("W6")}`} color={C.ac} />
+                <WireTag x={(xInv + wInv + xOut) / 2 - 40} y={loadY - 8} text="W6 — EPS BACKUP" color={C.ac} />
+                <VoltageDropBadge x={(xInv + wInv + xOut) / 2 + 84} y={loadY + 26} calc={calc("W6")} />
               </g>
             ) : (
               <>
@@ -821,7 +843,8 @@ export function SldSvg({
                 <line x1={xOut - 26} y1={loadY} x2={xOut} y2={loadY} stroke={C.ac} strokeWidth={2} markerEnd="url(#sld-arrow)" />
                 <Node x={xOut - 26} y={dcY} color={C.ac} />
                 <PhaseMark x={(from + xOut) / 2 + 26} y={dcY} phase3={phase3} />
-                <WireTag x={(from + xOut) / 2} y={dcY - 6} text={`W5${drop("W5")}`} color={C.ac} />
+                <WireTag x={(from + xOut) / 2} y={dcY - 8} text="W5" color={C.ac} />
+                <VoltageDropBadge x={(from + xOut) / 2} y={dcY + 28} calc={calc("W5")} />
               </>
             )}
           </>
@@ -861,41 +884,35 @@ export function SldSvg({
       })()}
 
       {/* ── محاكاة تدفق الطاقة المتحرك على المسارات العاملة ───────────────── */}
-      {anim && flow !== "none" && (() => {
-        const riser = xInv + wInv / 2;
-        const backup = Boolean(bat && inv);
-        const loadY = backup ? dcY + 86 : m.grid ? dcY + 34 : dcY;
+      {flow !== "none" && (() => {
         const pvOn = flow === "day" && Boolean(pv && inv);
-        const gridOn = Boolean(m.grid && ac && flow !== "outage");
         const batOn = Boolean(bat && inv);
         const charging = flow === "day";
+        const flowClass = (reverse = false) => anim ? (reverse ? "sldFlowR" : "sldFlow") : "sldFlowPaused";
         return (
           <g pointerEvents="none">
             {pvOn && (
               <>
-                <path d={`M ${xPv + 90} ${busY} L ${dc ? xDc : xInv} ${busY}`} className="sldFlow" stroke={C.dc} />
-                <path d={`M ${dcOutX} ${dcY} L ${xInv} ${dcY}`} className="sldFlow" stroke={C.dc} />
+                <path d={`M ${xPv + 90} ${busY} L ${dc ? xDc : xInv} ${busY}`} className={flowClass()} stroke={C.dc} />
+                <path d={`M ${dcOutX} ${dcY} L ${xInv} ${dcY}`} className={flowClass()} stroke={C.dc} />
               </>
             )}
             {batOn && (
               <path
-                d={`M ${riser} ${batY} L ${riser} ${invY + invH}`}
-                className={charging ? "sldFlowR" : "sldFlow"}
+                d={`M ${batteryRiserX} ${batY} L ${batteryRiserX} ${invY + invH}`}
+                className={flowClass(charging)}
                 stroke={C.dc}
               />
-            )}
-            {gridOn && (
-              <path d={`M ${xInv + wInv} ${dcY} L ${xOut - 26} ${dcY}`} className="sldFlow" stroke={C.ac} />
             )}
             {backup && (
               <path
                 d={`M ${xInv + wInv} ${dcY + 30} L ${xInv + wInv + 18} ${dcY + 30} L ${xInv + wInv + 18} ${loadY} L ${xOut} ${loadY}`}
-                className="sldFlow"
+                className={flowClass()}
                 stroke={C.ac}
               />
             )}
             {!backup && ac && flow !== "outage" && (
-              <path d={`M ${xInv + wInv} ${dcY} L ${xOut - 26} ${dcY} L ${xOut - 26} ${loadY} L ${xOut} ${loadY}`} className="sldFlow" stroke={C.ac} />
+                <path d={`M ${xInv + wInv} ${dcY} L ${xOut - 26} ${dcY} L ${xOut - 26} ${loadY} L ${xOut} ${loadY}`} className={flowClass()} stroke={C.ac} />
             )}
           </g>
         );

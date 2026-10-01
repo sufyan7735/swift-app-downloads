@@ -1330,10 +1330,10 @@ function normalizeModel(text: string) {
 const ARABIC_BRANDS: { pattern: RegExp; brand: string }[] = [
   { pattern: /سنتك|SUNTECH/i, brand: "Suntech" },
   { pattern: /داي|دي\s*اي|DEYE/i, brand: "Deye" },
-  { pattern: /سوليس|SOLIS/i, brand: "Solis" },
-  { pattern: /لايف?\s*باور|لي\s*باور|LI-?POWER/i, brand: "Li-Power" },
+  { pattern: /سوليس|سوليز|SOLIS/i, brand: "Solis" },
+  { pattern: /لايف?\s*باور|لي\s*باور|ليو\s*باور|LI-?POWER/i, brand: "Li-Power" },
   { pattern: /بايلونتك|بايلونتيك|PYLONTECH/i, brand: "Pylontech" },
-  { pattern: /هايثيوم|HITHIUM|HEROEE/i, brand: "HiTHIUM (HeroEE)" },
+  { pattern: /هايثيوم|هيثيوم|HITHIUM|HEROEE/i, brand: "HiTHIUM" },
 ];
 
 /**

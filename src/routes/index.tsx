@@ -1569,10 +1569,29 @@ function QuoteWorkspace({ view, session, step, draft, setDraft, onPick, onBack, 
   const studyScreen = !ecoScreen && studyFresh && showStudyOnly && view.study;
   // شاشة المخطط الكهربائي تُعرض وحدها كاملة عند طلبها
   const [showSldOnly, setShowSldOnly] = useState(true);
-  const sldParams = view.sld?.params || null;
-  useEffect(() => { setShowSldOnly(true); }, [view.sld?.number, Boolean(sldParams)]);
+  const rawSldParams = view.sld?.params || null;
+  useEffect(() => { setShowSldOnly(true); }, [view.sld?.number, Boolean(rawSldParams)]);
+  // البدائل الهندسية: الاقتصادي / الموصى به / أقصى استقلالية
+  const [variantId, setVariantId] = useState<VariantId>("rec");
+  useEffect(() => { setVariantId("rec"); }, [view.quote?.number]);
+  const variants = useMemo(() => {
+    const items = view.quote?.items || (view.study?.params?.["quote_items"] as View["quote"]["items"] | undefined) || [];
+    const perString = Number((rawSldParams?.["perStr"] as number | undefined) || 0);
+    return buildVariants({ items, perString });
+  }, [view.quote?.items, view.study?.params, rawSldParams]);
+  const variant = useMemo(() => variants?.find((v) => v.id === variantId) || null, [variants, variantId]);
+  const quoteView = useMemo(() => {
+    if (!view.quote || !variant || variant.id === "rec") return view.quote;
+    return { ...view.quote, items: variant.items, total: variant.total };
+  }, [view.quote, variant]);
+  const studyView = useMemo(() => {
+    if (!view.study || !variant || variant.id === "rec") return view.study;
+    return { ...view.study, params: applyVariantToStudyParams(view.study.params, variant) };
+  }, [view.study, variant]);
+  const sldParams = useMemo(() => applyVariantToSldParams(rawSldParams, variant), [rawSldParams, variant]);
   const sldScreen = Boolean(sldParams) && showSldOnly && !studyScreen && !ecoScreen;
   const hasOutputs = Boolean(view.quote || view.study || view.sld || view.specs.length);
+
   // شاشة عرض السعر الرسمي: عنوان ثابت بدل نص المتابعة القادم من المحرك
   const title = ecoScreen
     ? "دراسة الجدوى الاقتصادية والوفر البيئي"

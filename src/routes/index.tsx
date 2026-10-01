@@ -1678,7 +1678,7 @@ function QuoteWorkspace({ view, session, step, draft, setDraft, onPick, onBack, 
 
             {view.specs.length > 0 && <SystemSpecs specs={view.specs} hint={[session["phase_type"], session["system_type"]].filter(Boolean).join(" ")} onOpenProduct={onOpenProduct} />}
             {view.quote && <QuoteCard quote={view.quote} />}
-            {view.study && !studyFresh && <PvsystStudy study={view.study} />}
+            {view.study && studyFresh && !showStudyOnly && <PvsystStudy study={view.study} />}
             {view.sld && (view.sld.params
               ? <SldDiagram params={view.sld.params} number={view.sld.number} />
               : <DetailCard icon={<Network />} title="المخطط الكهربائي أحادي الخط (SLD)" number={view.sld.number} rows={view.sld.rows} />)}

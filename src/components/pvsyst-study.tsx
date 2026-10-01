@@ -355,16 +355,6 @@ export default function PvsystStudy({ study, actions }: Props) {
               {arTerms ? "الرموز الهندسية" : "التسميات العربية"}
             </button>
           )}
-          {actions?.onEco && (
-            <button
-              type="button"
-              onClick={actions.onEco}
-              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-bold text-white shadow-sm transition hover:opacity-90"
-            >
-              <BadgeDollarSign className="size-3.5" />
-              الجدوى الاقتصادية
-            </button>
-          )}
         </div>
       </div>
 
@@ -915,25 +905,6 @@ export default function PvsystStudy({ study, actions }: Props) {
         </p>
       )}
 
-      {/* بطاقة الانتقال إلى الجدوى الاقتصادية */}
-      {actions?.onEco && (
-        <button
-          type="button"
-          onClick={actions.onEco}
-          className="mt-3 flex w-full items-center gap-3 rounded-xl bg-emerald-600 px-4 py-3 text-right text-white shadow-sm ring-1 ring-black/5 transition hover:opacity-90"
-        >
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/20">
-            <BadgeDollarSign className="size-5" />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-sm font-black">عرض الجدوى الاقتصادية والوفر المالي</span>
-            <span className="block text-[11px] text-white/85">
-              الاسترداد، العائد على الاستثمار، والوفر البيئي
-            </span>
-          </span>
-          <ArrowLeft className="size-4 shrink-0" />
-        </button>
-      )}
 
       <div className="mt-4 flex flex-wrap gap-2">
         <button

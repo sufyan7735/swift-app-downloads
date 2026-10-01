@@ -167,7 +167,7 @@ function CategoryView({ category, onOpen, onBack }: { category: ProductCategory;
   const cat = CATEGORIES.find((c) => c.id === category)!;
   const items = useMemo(() => productsByCategory(category), [category]);
   const brands = useMemo(() => Array.from(new Set(items.map(brandOf))), [items]);
-  const [brand, setBrand] = useState<string | null>(brands.length === 1 ? brands[0] : null);
+  const [brand, setBrand] = useState<string | null>(brands.length === 1 ? brands[0] ?? null : null);
   const shown = brand ? items.filter((p) => brandOf(p) === brand) : [];
   useScreenVoice(
     `catalog-cat-${category}-${brand ?? "brands"}`,

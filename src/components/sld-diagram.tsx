@@ -1186,13 +1186,7 @@ export function SldSvg({
                   color={C.dc}
                 />
                 <VoltageDropBadge x={riser - 70} y={batY + 50} calc={calc("W3")} />
-                <text
-                  x={riser + 8}
-                  y={batY - 44}
-                  fontFamily={F}
-                  fontSize={7.6}
-                  fill={C.dc}
-                >
+                <text x={riser + 8} y={batY - 44} fontFamily={F} fontSize={7.6} fill={C.dc}>
                   BAT
                 </text>
               </g>

@@ -91,7 +91,7 @@ function CategoriesScreen({ onPick, onBack }: { onPick: (c: ProductCategory | "a
         <BackButton onClick={onBack} label="الرئيسية" />
       </header>
 
-      <div className="stagger-in grid gap-4 md:grid-cols-3">
+      <div className="stagger-in grid grid-cols-2 gap-3 md:grid-cols-4">
         {CATEGORIES.map((cat) => {
           const items = productsByCategory(cat.id);
           const brands = Array.from(new Set(items.map((p) => p.brand)));
@@ -106,31 +106,28 @@ function CategoriesScreen({ onPick, onBack }: { onPick: (c: ProductCategory | "a
               onClick={() => onPick(cat.id)}
               className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card text-right shadow-sm transition hover:-translate-y-0.5 hover:shadow-xl"
             >
-              <span className={`flex items-center justify-between px-5 py-6 ${CAT_TONE[cat.id]}`}>
+              <span className={`flex items-center justify-between gap-2 px-3 py-3 ${CAT_TONE[cat.id]}`}>
                 <span className="text-right">
-                  <span className="block text-2xl font-black leading-tight lg:text-3xl">{cat.title}</span>
-                  <span className="mt-1 block text-[12px] font-bold opacity-85">{cat.subtitle}</span>
+                  <span className="block text-sm font-black leading-tight lg:text-base">{cat.title}</span>
                 </span>
-                <span className="shrink-0 opacity-90 transition group-hover:scale-110">{CAT_BIG_ICON[cat.id]}</span>
+                <span className="shrink-0 opacity-90 transition group-hover:scale-110 [&_svg]:size-7">{CAT_BIG_ICON[cat.id]}</span>
               </span>
-              <span className="flex flex-1 flex-col gap-3 p-4">
-                <span className="grid grid-cols-3 gap-2 text-center">
+              <span className="flex flex-1 flex-col gap-2 p-2.5">
+                <span className="grid grid-cols-3 gap-1 text-center">
                   {preview.map((p) => (
-                    <span key={p.id} className="overflow-hidden rounded-xl border border-border/70 bg-background p-1.5 shadow-sm">
+                    <span key={p.id} className="overflow-hidden rounded-md border border-border/70 bg-background p-0.5">
                       <img src={p.image} alt={p.name} loading="lazy" className="aspect-square w-full scale-105 object-contain" />
                     </span>
                   ))}
                 </span>
-                <span className="flex flex-wrap gap-1.5">
+                <span className="hidden flex-wrap gap-1.5">
                   {brands.map((b) => (
                     <span key={b} className="rounded-full bg-navy-soft px-2.5 py-0.5 text-[11px] font-bold text-navy" dir="ltr">{b}</span>
                   ))}
                 </span>
-                <span className="mt-auto flex items-center justify-between border-t border-border/70 pt-3">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-black text-navy"><Layers className="size-4 text-skyline" /> {items.length} موديل متاح</span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-brand px-3 py-1.5 text-xs font-bold text-brand-foreground shadow-sm transition group-hover:opacity-90">
-                    <ArrowRight className="size-3.5" /> استعراض الفئة
-                  </span>
+                <span className="mt-auto flex items-center justify-between gap-1 border-t border-border/70 pt-2">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-black text-navy"><Layers className="size-3.5 text-skyline" /> {items.length} موديل</span>
+                  <ArrowRight className="size-4 text-brand" />
                 </span>
               </span>
             </button>
@@ -139,7 +136,7 @@ function CategoriesScreen({ onPick, onBack }: { onPick: (c: ProductCategory | "a
         <button
           type="button"
           onClick={() => onPick("all")}
-          className="group flex flex-col justify-between gap-4 overflow-hidden rounded-2xl border border-border bg-card p-5 text-right shadow-sm transition hover:-translate-y-0.5 hover:shadow-xl md:col-span-3"
+          className="group flex flex-col justify-between gap-4 overflow-hidden rounded-2xl border border-border bg-card p-5 text-right shadow-sm transition hover:-translate-y-0.5 hover:shadow-xl order-first col-span-2 md:col-span-4"
         >
           <span className="flex items-center justify-between">
             <span>

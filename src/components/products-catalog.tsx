@@ -286,13 +286,11 @@ function makerLogo(b: string) {
 function BrandBadge({ brand, large = false }: { brand: string; large?: boolean }) {
   const logo = makerLogo(brand);
   return (
-    <span dir="ltr" className="pointer-events-none absolute left-2 top-2 z-10 flex flex-col items-start gap-1">
-      <span className={`flex items-center rounded-md border border-border/70 bg-card/90 font-black tracking-wide text-navy shadow-sm backdrop-blur ${large ? "h-9 px-3 text-base" : "h-6 px-2 text-[11px]"}`}>
-        {logo ? <img src={logo} alt={brandLabel(brand)} className={large ? "h-6 w-auto max-w-32" : "h-4 w-auto max-w-20"} /> : brandLabel(brand)}
+    <span dir="ltr" className={`pointer-events-none flex w-full items-center justify-between gap-2 border-b border-border/70 bg-card ${large ? "h-14 px-3" : "h-8 px-2"}`}>
+      <span className={`flex items-center font-black tracking-wide text-navy ${large ? "text-base" : "text-[11px]"}`}>
+        {logo ? <img src={logo} alt={brandLabel(brand)} className={large ? "h-7 w-auto max-w-36" : "h-4 w-auto max-w-20"} /> : brandLabel(brand)}
       </span>
-      <span className={`ms-1 flex items-center rounded-lg border border-border/60 bg-card shadow-lg ${large ? "px-2 py-1" : "px-1.5 py-0.5"}`}>
-        <img src="/brand/actes-logo-full.png" alt="ACTES" className={large ? "h-9 w-auto" : "h-5 w-auto"} />
-      </span>
+      <img src="/brand/actes-logo-full.png" alt="ACTES" className={large ? "h-10 w-auto" : "h-5 w-auto"} />
     </span>
   );
 }

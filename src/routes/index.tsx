@@ -1431,24 +1431,12 @@ const PARTNER_LINKS = [
 
 function PartnersStrip() {
   const trackRef = useRef<HTMLDivElement>(null);
-  const scrollBy = (dir: number) => {
-    const el = trackRef.current;
-    if (el) el.scrollBy({ left: dir * Math.max(160, el.clientWidth * 0.6), behavior: "smooth" });
-  };
   return (
     <section
       aria-label="وكلاء وشركاء ACTES"
       className="shrink-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
     >
       <div className="flex items-stretch">
-        <button
-          type="button"
-          onClick={() => scrollBy(-1)}
-          aria-label="الوكلاء السابقون"
-          className="grid w-10 shrink-0 place-items-center border-l border-border/70 text-navy/60 transition hover:bg-muted hover:text-navy"
-        >
-          <ChevronLeft className="size-4" />
-        </button>
 
         <div ref={trackRef} className="min-w-0 flex-1 px-1 py-1">
           <div className="relative w-full">
@@ -1475,14 +1463,6 @@ function PartnersStrip() {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => scrollBy(1)}
-          aria-label="الوكلاء التاليون"
-          className="grid w-10 shrink-0 place-items-center border-r border-border/70 text-navy/60 transition hover:bg-muted hover:text-navy"
-        >
-          <ChevronRight className="size-4" />
-        </button>
       </div>
     </section>
   );

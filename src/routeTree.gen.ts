@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DownloadsRouteImport } from './routes/downloads'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as ApiPublicWaInvoiceRouteImport } from './routes/api/public/wa-invoice'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DownloadsRoute = DownloadsRouteImport.update({
+  id: '/downloads',
+  path: '/downloads',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTtsRoute = ApiTtsRouteImport.update({
@@ -31,30 +37,34 @@ const ApiPublicWaInvoiceRoute = ApiPublicWaInvoiceRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/downloads': typeof DownloadsRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/public/wa-invoice': typeof ApiPublicWaInvoiceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/downloads': typeof DownloadsRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/public/wa-invoice': typeof ApiPublicWaInvoiceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/downloads': typeof DownloadsRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/public/wa-invoice': typeof ApiPublicWaInvoiceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/tts' | '/api/public/wa-invoice'
+  fullPaths: '/' | '/downloads' | '/api/tts' | '/api/public/wa-invoice'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/tts' | '/api/public/wa-invoice'
-  id: '__root__' | '/' | '/api/tts' | '/api/public/wa-invoice'
+  to: '/' | '/downloads' | '/api/tts' | '/api/public/wa-invoice'
+  id: '__root__' | '/' | '/downloads' | '/api/tts' | '/api/public/wa-invoice'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DownloadsRoute: typeof DownloadsRoute
   ApiTtsRoute: typeof ApiTtsRoute
   ApiPublicWaInvoiceRoute: typeof ApiPublicWaInvoiceRoute
 }
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/downloads': {
+      id: '/downloads'
+      path: '/downloads'
+      fullPath: '/downloads'
+      preLoaderRoute: typeof DownloadsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/tts': {
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DownloadsRoute: DownloadsRoute,
   ApiTtsRoute: ApiTtsRoute,
   ApiPublicWaInvoiceRoute: ApiPublicWaInvoiceRoute,
 }

@@ -419,6 +419,7 @@ function WireTag({
   text: string;
   color: string;
 }) {
+  if (useHideSchematic()) return null;
   return (
     <text x={x} y={y} textAnchor="middle" fontFamily={F} fontSize={8} fontWeight={700} fill={color}>
       {label}

@@ -836,7 +836,7 @@ export const PRODUCTS: Product[] = [
     category: "batteries",
     brand: "Pylontech",
     name: "بطارية منزلية Pylontech Fidus Battery Plus ‏16kWh",
-    model: "FB-L-16 / FB-L-16-Pro",
+    model: "Fidus-FB-L-16-PRO",
     power: "16.08 kWh",
     description: "بطارية منزلية 51.2V بسعة 16076Wh وعمق تفريغ 100% وحماية IP65 مع وحدة إطفاء حريق.",
     about:
@@ -1120,19 +1120,21 @@ const INVERTER_VARIANTS: Record<string, { nameBase: string; variants: VariantDef
     nameBase: "إنفرتر هجين Deye أحادي الطور",
     variants: [
       { key: "7.6K", label: "7.6kW", power: "7.6 kW", model: "SUN-7.6K-SG02LP1-EU-AM2-P" },
-      { key: "8K", label: "8kW", power: "8 kW", model: "SUN-8K-SG02LP1-EU-AM2-P" },
+      { key: "8K", label: "8kW", power: "8 kW", model: "SUN-8K-SG01LP1-EU" },
       { key: "10K", label: "10kW", power: "10 kW", model: "SUN-10K-SG02LP1-EU-AM3-P" },
-      { key: "12K", label: "12kW", power: "12 kW", model: "SUN-12K-SG02LP1-EU-AM3-P" },
+      { key: "12K", label: "12kW", power: "12 kW", model: "SUN-12K-SG01LP1-EU-AM3" },
+      { key: "16K-1P", label: "16kW", power: "16 kW", model: "SUN-16K-SG01LP1-EU" },
     ],
   },
   "deye-sun-14-20k-sg05lp3": {
     nameBase: "إنفرتر هجين Deye ثلاثي الطور جهد منخفض",
     variants: [
+      { key: "12K-3P", label: "12kW", power: "12 kW", model: "SUN-12K-SG04LP3-EU" },
       { key: "14K", label: "14kW", power: "14 kW", model: "SUN-14K-SG05LP3-EU-SM2" },
       { key: "15K", label: "15kW", power: "15 kW", model: "SUN-15K-SG05LP3-EU-SM2" },
       { key: "16K", label: "16kW", power: "16 kW", model: "SUN-16K-SG05LP3-EU-SM2" },
       { key: "18K", label: "18kW", power: "18 kW", model: "SUN-18K-SG05LP3-EU-SM2" },
-      { key: "20K", label: "20kW", power: "20 kW", model: "SUN-20K-SG05LP3-EU-SM2" },
+      { key: "20K", label: "20kW", power: "20 kW", model: "SUN-20K-SG05LP3EU-SM2" },
     ],
   },
   "deye-sun-29-9-50k-sg01hp3": {
@@ -1235,7 +1237,43 @@ function inverterAllowed(p: Product) {
   const kw = parseFloat(String(p.power).replace(/[^\d.]/g, ""));
   return Boolean(allowed && allowed.includes(kw));
 }
-export const CATALOG_PRODUCTS: Product[] = PRODUCTS.flatMap(expandProduct).filter(inverterAllowed);
+type SpecOverride = { description: string; specs: Product["specs"]; features?: string[] };
+const W = "ضمان 30 سنة";
+const PANEL_CERTS = "IEC61215، IEC61730، ISO9001، ISO14001، ISO45001";
+const panelSpec = (w: string, bus: string, eff: string, bifacial: boolean): SpecOverride => ({
+  description: `لوح سنتك ${w} وات N-Type TOPCon${bifacial ? " ثنائي الوجه" : ""} بكفاءة ${eff}.`,
+  features: [`${bus} بزار لتحسين جمع التيار`, `كفاءة ${eff}`, "إطار ألمنيوم يتحمل 5400 باسكال", W],
+  specs: [{ title: "المواصفات المعتمدة", rows: [["القدرة", `${w} W`], ["التقنية", `N-Type TOPCon${bifacial ? " ثنائي الوجه" : ""}`], ["عدد البزارات", bus], ["الكفاءة", eff], ["أقصى جهد للنظام", "1500 VDC"], ["تفاوت القدرة", "0 ~ +5%"], ["عامل الامتلاء", "0.80"], ["الإطار", "ألمنيوم — 5400 Pa"], ["الضمان", "30 سنة"], ["الشهادات", PANEL_CERTS]] }],
+});
+const invSpec = (kw: string, phase: string, pv: string, mppt: string, chg: string, extra: [string, string][]): SpecOverride => ({
+  description: `انفرتر دايا هايبرد ${kw} كيلو ${phase} — دخل ألواح حتى ${pv}، ${mppt} MPPT، شحن ${chg}.`,
+  specs: [{ title: "المواصفات المعتمدة", rows: [["القدرة", `${kw} kW`], ["الطور", phase], ["أقصى دخل ألواح", pv], ["عدد MPPT", mppt], ["أقصى تيار شحن/تفريغ", chg], ...extra] }],
+});
+const batSpec = (v: string, e: string, use: string, a: string, par: string, cyc: string, life: string, ip: string, extra: [string, string][] = []): SpecOverride => ({
+  description: `بطارية ليثيوم بايلونتك ${e} بجهد ${v} — سعة قابلة للاستخدام ${use}.`,
+  specs: [{ title: "المواصفات المعتمدة", rows: [["الجهد الاسمي", v], ["الطاقة الاسمية", e], ["الطاقة القابلة للاستخدام", use], ["تيار الشحن/التفريغ", a], ["أقصى ربط", par], ["دورة الحياة", cyc], ["العمر/الضمان", life], ["الحماية", ip], ...extra] }],
+});
+/** مواصفات معتمدة من العميل تحل محل مواصفات الأصناف المشابهة. */
+const SPEC_OVERRIDES: Record<string, SpecOverride> = {
+  "suntech-stp595s-c72-nsh": panelSpec("595", "16", "23.1%", false),
+  "suntech-stp720s-d66-nsh": panelSpec("720", "18", "23.2%", true),
+  "deye-sun-7-6-12k-sg02lp1--8k": invSpec("8", "سنجل فاز", "16 kW", "4", "190 A", [["الكفاءة", "97.6%"], ["الحماية", "IP65"]]),
+  "deye-sun-7-6-12k-sg02lp1--12k": invSpec("12", "سنجل فاز", "24 kW", "3", "250 A", [["الكفاءة", "97.6%"], ["الحماية", "IP65"]]),
+  "deye-sun-7-6-12k-sg02lp1--16k-1p": invSpec("16", "سنجل فاز", "32 kW", "3", "290 A", [["مزايا", "جهاز تحكم، تصدير كهرباء، واي فاي"], ["الحماية", "IP65"]]),
+  "deye-sun-14-20k-sg05lp3--12k-3p": invSpec("12", "3 فاز 400/230V", "24 kW", "2", "240 A", [["أقصى جهد ألواح", "800 V"]]),
+  "deye-sun-14-20k-sg05lp3--20k": invSpec("20", "3 فاز 400/230V", "40 kW", "2", "350 A", [["أقصى جهد ألواح", "800 V"]]),
+  "pylontech-fidus-battery-plus": batSpec("51.2 V", "16 kWh", "14.47 kWh", "200 A", "120 بطارية", "8000 دورة", "10 سنوات", "IP65"),
+  "pylontech-uf5000": batSpec("51.2 V", "5.12 kWh", "4.864 kWh", "100 A", "20 بطارية", "6000 دورة", "15 سنة", "IP20"),
+  "pylontech-rv12200": batSpec("12.8 V", "2.56 kWh", "2.3 kWh", "100 A", "16 بطارية", "4000 دورة", "10 سنوات", "IP65"),
+  "pylontech-rv12100ch": batSpec("12.8 V", "1.28 kWh", "1.15 kWh", "100 A", "8 بطاريات", "4000 دورة", "10 سنوات (ضمان سنتان)", "IP20"),
+};
+function applyOverride(p: Product): Product {
+  const o = SPEC_OVERRIDES[p.id];
+  if (!o) return p;
+  const { modelTable: _m, ...rest } = p;
+  return { ...rest, description: o.description, specs: o.specs, ...(o.features ? { features: o.features } : {}) };
+}
+export const CATALOG_PRODUCTS: Product[] = PRODUCTS.flatMap(expandProduct).filter(inverterAllowed).map(applyOverride);
 
 function capacityKWh(p: Product) {
   const src = `${p.power ?? ""} ${p.name ?? ""}`;

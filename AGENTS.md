@@ -11,7 +11,7 @@
 
 ## Project rules
 
-- READ `HANDOFF.md` first — full project context; "أكمل" means continue the remaining product videos there, 3 per batch.
+- READ `HANDOFF.md` first; "أكمل" = continue its remaining product videos, 3 per batch.
 - Fonts are self-hosted in `public/fonts/` via `/fonts/fonts.css` in `src/routes/__root.tsx` — no external font requests.
 - All runtime media resolves to local paths (`/videos`, `/media`, `/catalogs`, `/fonts`, `/brand`) — never `/__l5e/` CDN or remote hosts, so the desktop app runs offline.
 - Repo files stay under 10 MB: bigger videos live split in `public/videos/parts/`, reassembled by `src/lib/video-source.ts`; keep original 1080p quality, never transcode.

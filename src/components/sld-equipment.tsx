@@ -268,8 +268,16 @@ function Inverter({ x, y, w, h, accent }: Box) {
         strokeWidth={2}
         strokeLinecap="round"
       />
-      <text x={bx + 27} y={y + bh - 24} fontFamily={F} fontSize={5.8} fontWeight={700} fill={C.dc}>
-        DC SWITCH
+      <text
+        x={bx + 16}
+        y={y + bh - 7}
+        textAnchor="middle"
+        fontFamily={F}
+        fontSize={5}
+        fontWeight={700}
+        fill={C.dc}
+      >
+        DC SW
       </text>
       <Glands x={bx + 12} y={y + bh + 1} n={Math.max(3, Math.floor(bw / 28))} />
     </g>

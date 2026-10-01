@@ -403,7 +403,7 @@ function Block({
         y={y + 12}
         textAnchor="middle"
         fontFamily={F}
-        fontSize={9.5}
+        fontSize={Math.max(6.4, Math.min(9.5, (w - 12) / (title.length * 0.85)))}
         fontWeight={700}
         fill={C.ink}
       >
@@ -554,11 +554,8 @@ export function SldSvg({
   real?: boolean;
 }) {
   const W = 1560;
-  const drawnStrings = Math.min(m.pv?.strings || 1, 4);
   const pvTop = 52;
   const rowH = 44;
-  const pvH = drawnStrings * rowH;
-  const busY = pvTop + pvH / 2;
 
   const pv = m.pv;
   const dc = m.dcBox;
@@ -566,23 +563,35 @@ export function SldSvg({
   const bat = m.battery;
   const ac = m.acBox;
 
+  const drawnStrings = Math.min(m.pv?.strings || 1, 6);
+  const pvH = drawnStrings * rowH;
+
+  const mppt = mpptMap(m);
+  const mpptByInv = mpptMapByInverter(m);
+
   // تعدد الإنفرترات: يُرسم كل إنفرتر كوحدة مستقلة بمداخل MPPT خاصة به.
   const invCount = Math.max(1, Math.floor(inv?.qty || 1));
   const drawnInv = Math.min(invCount, 4);
   const multiInv = drawnInv > 1;
-  const invUnitH = multiInv ? 84 : 92;
-  const invGap = 22;
+  /** أكبر عدد مداخل MPPT على وحدة واحدة — يحدد ارتفاع صندوق الإنفرتر. */
+  const maxGroups = multiInv
+    ? Math.max(1, ...Array.from({ length: drawnInv }, (_, u) => mpptByInv[u]?.length || 1))
+    : 1;
+  const invUnitH = multiInv ? Math.max(84, maxGroups * 18 + 28) : 92;
+  const invGap = multiInv ? 30 : 22;
   const stackH = drawnInv * invUnitH + (drawnInv - 1) * invGap;
 
+  // محور الناقل الرئيسي يتوسّط أطول العنصرين: مصفوفة الألواح أو مجموعة الإنفرترات
+  const busY = Math.max(pvTop + pvH / 2, pvTop + stackH / 2 + 26);
+  /** بداية صفوف السلاسل بعد توسيطها على المحور الرئيسي. */
+  const pvRowTop = busY - pvH / 2;
   const invY = busY - stackH / 2;
   const invH = stackH;
 
-  const batY = Math.max(busY + 150, invY + stackH + 86);
+  const batY = Math.max(busY + 150, invY + stackH + 96);
   const bottom = Math.max(busY + 120, batY + 70, invY + stackH + 40);
-  const earthY = bottom + 64;
-  const H = earthY + 64;
-  const mppt = mpptMap(m);
-  const mpptByInv = mpptMapByInverter(m);
+  const earthY = bottom + 72;
+  const H = earthY + 72;
   /** البطاريات عالية الجهد تُرسم خزانة برجية، والمنخفضة وحدة جدارية. */
   const batArt: EquipKind = (m.battery?.vdc || 0) >= 96 ? "battery-rack" : "battery-wall";
 
@@ -590,11 +599,11 @@ export function SldSvg({
   const wPv = 198;
   const xDc = 308;
   const wDc = 146;
-  const xInv = 558;
+  const xInv = multiInv ? 604 : 558;
   const wInv = 184;
-  const xAc = 840;
+  const xAc = multiInv ? 896 : 840;
   const wAc = 154;
-  const xAts = 1090;
+  const xAts = multiInv ? 1104 : 1090;
   const wAts = 142;
   const xOut = 1320;
   const wOut = 206;
@@ -623,7 +632,11 @@ export function SldSvg({
   const dcY = busY;
   const powerOutX = xInv + wInv;
   const backup = Boolean(bat && inv);
-  const loadY = backup ? dcY + 86 : m.grid ? dcY + 34 : dcY;
+  // مسار EPS يمرّ أسفل مجموعة الإنفرترات ولوحة الـ AC حتى لا يعبر الصناديق
+  const loadY = backup ? Math.max(dcY + 86, invY + invH + 40) : m.grid ? dcY + 34 : dcY;
+  /** صندوق لوحة الـ AC بارتفاع ثابت متوسّط المحور عند تعدد الإنفرترات. */
+  const acBoxH = multiInv ? 150 : invH + 12;
+  const acBoxY = multiInv ? dcY - acBoxH / 2 : invY - 6;
   const batteryRiserX = xInv + wInv / 2;
   const mainFromX = m.ats && ac ? xAts + wAts : ac ? xAc + wAc : powerOutX;
 
@@ -694,13 +707,20 @@ export function SldSvg({
             style={pick ? { cursor: "pointer" } : undefined}
             onClick={pick ? () => pick("pv") : undefined}
           >
-            <text x={xPv} y={pvTop - 14} fontFamily={F} fontSize={10} fontWeight={700} fill={C.dc}>
+            <text
+              x={xPv}
+              y={pvRowTop - 14}
+              fontFamily={F}
+              fontSize={10}
+              fontWeight={700}
+              fill={C.dc}
+            >
               DC SIDE — PV ARRAY {pv.kwp ? `${pv.kwp.toFixed(2)} kWp` : ""}
             </text>
             {active === "pv" && (
               <rect
                 x={xPv - 8}
-                y={pvTop - 8}
+                y={pvRowTop - 8}
                 width={wPv + 14}
                 height={pvH + 40}
                 fill="none"
@@ -710,13 +730,13 @@ export function SldSvg({
               />
             )}
             {Array.from({ length: drawnStrings }).map((_, i) => {
-              const y = pvTop + i * rowH + 8;
+              const y = pvRowTop + i * rowH + 8;
               return (
                 <g key={i}>
                   {[0, 1, 2].map((k) => (
                     <PvSymbol key={k} x={xPv + k * 30} y={y} w={26} h={22} real={real} />
                   ))}
-                  <text x={xPv + 92} y={y + 6} fontFamily={F} fontSize={8.4} fill={C.ink}>
+                  <text x={xPv + 96} y={y + 1} fontFamily={F} fontSize={8.4} fill={C.ink}>
                     {`String ${i + 1} — ${pv.perString} × ${pv.wp} Wp`}
                   </text>
                   <line
@@ -727,13 +747,13 @@ export function SldSvg({
                     stroke={C.dc}
                     strokeWidth={1.5}
                   />
-                  <Polarity x={xPv + 100} y={y + 8} sign="+" />
-                  <Polarity x={xPv + 114} y={y + 8} sign="−" />
+                  <Polarity x={xPv + 100} y={y + 25} sign="+" />
+                  <Polarity x={xPv + 116} y={y + 25} sign="−" />
                   <Node x={dc ? xDc : xInv} y={y + 11} color={C.dc} />
                   {pv.strings > drawnStrings && i === drawnStrings - 1 && (
                     <text
                       x={xPv}
-                      y={y + 34}
+                      y={y + 38}
                       fontFamily={F}
                       fontSize={8.4}
                       fontStyle="italic"
@@ -745,7 +765,7 @@ export function SldSvg({
                 </g>
               );
             })}
-            <text x={xPv} y={pvTop + pvH + 24} fontFamily={F} fontSize={8.4} fill={C.soft}>
+            <text x={xPv} y={pvRowTop + pvH + 54} fontFamily={F} fontSize={8.4} fill={C.soft}>
               {`${pv.model}${pv.strVoc ? ` — Voc/string ${Math.round(pv.strVoc)} V` : ""}${pv.strVmp ? ` / Vmp ${Math.round(pv.strVmp)} V` : ""}`}
             </text>
           </g>
@@ -756,7 +776,7 @@ export function SldSvg({
           <>
             <Block
               x={xDc}
-              y={pvTop}
+              y={pvRowTop}
               w={wDc}
               h={Math.max(pvH + 8, 74)}
               title="DC PROTECTION BOARD"
@@ -775,9 +795,9 @@ export function SldSvg({
               real={real}
             />
             {Array.from({ length: drawnStrings }).map((_, i) => (
-              <FuseSymbol key={i} x={xDc + wDc - 20} y={pvTop + i * rowH + 19} />
+              <FuseSymbol key={i} x={xDc + wDc - 20} y={pvRowTop + i * rowH + 19} />
             ))}
-            <SpdSymbol x={xDc + 22} y={pvTop + Math.max(pvH + 8, 74) + 12} />
+            <SpdSymbol x={xDc + 22} y={pvRowTop + Math.max(pvH + 8, 74) + 14} />
             <IsolatorSymbol x={xDc + wDc + 22} y={dcY - 34} color={C.dc} />
             {/* توزيع السلاسل على مداخل الـ MPPT: كل مدخل بخطه وتياره وفيوزه */}
             {!multiInv &&
@@ -822,7 +842,11 @@ export function SldSvg({
         {m.cables[0] && (
           <>
             <WireTag x={(dcOutX + xInv) / 2} y={dcY - 8} text={dc ? "W2" : "W1"} color={C.dc} />
-            <VoltageDropBadge x={(dcOutX + xInv) / 2} y={dcY + 29} calc={calc(dc ? "W2" : "W1")} />
+            <VoltageDropBadge
+              x={(dcOutX + xInv) / 2}
+              y={multiInv ? invY - 20 : dcY + 62}
+              calc={calc(dc ? "W2" : "W1")}
+            />
           </>
         )}
         {pv && inv && (
@@ -875,11 +899,11 @@ export function SldSvg({
             >
               DC IN
             </text>
-            <text x={xInv + wInv + 6} y={dcY - 18} fontFamily={F} fontSize={7.6} fill={C.ac}>
+            <text x={xInv + wInv + 6} y={dcY - 44} fontFamily={F} fontSize={7.6} fill={C.ac}>
               GRID OUT
             </text>
             {bat && (
-              <text x={xInv + wInv + 6} y={dcY + 40} fontFamily={F} fontSize={7.6} fill={C.ac}>
+              <text x={xInv + wInv + 24} y={dcY + 56} fontFamily={F} fontSize={7.6} fill={C.ac}>
                 EPS / BACKUP
               </text>
             )}
@@ -906,7 +930,7 @@ export function SldSvg({
             const trunkX = dcOutX + 30;
             const acBusX = xInv + wInv + 10;
             const mpptY = (u: number, j: number, k: number) => {
-              const spread = Math.min(invUnitH - 26, Math.max(0, (k - 1) * 13));
+              const spread = Math.min(invUnitH - 20, Math.max(0, (k - 1) * 18));
               return cy(u) - spread / 2 + (k > 1 ? (j * spread) / (k - 1) : 0);
             };
             const allY: number[] = [];
@@ -989,7 +1013,9 @@ export function SldSvg({
                               fontWeight={700}
                               fill={C.dc}
                             >
-                              {`MPPT ${grp.index} — ${grp.strings.length} STR (S${grp.strings.join(", S")})`}
+                              {k > 3
+                                ? `MPPT ${grp.index} — ${grp.strings.length} STR`
+                                : `MPPT ${grp.index} — ${grp.strings.length} STR (S${grp.strings.join(", S")})`}
                             </text>
                             <text
                               x={xInv - 8}
@@ -1018,9 +1044,9 @@ export function SldSvg({
                   );
                 })}
                 <text
-                  x={xInv + wInv / 2}
-                  y={invY + stackH + 14}
-                  textAnchor="middle"
+                  x={xInv}
+                  y={invY + stackH + 24}
+                  textAnchor="start"
                   fontFamily={F}
                   fontSize={8}
                   fill={C.soft}
@@ -1029,9 +1055,9 @@ export function SldSvg({
                 </text>
                 {invCount > drawnInv && (
                   <text
-                    x={xInv + wInv / 2}
-                    y={invY + stackH + 26}
-                    textAnchor="middle"
+                    x={xInv}
+                    y={invY + stackH + 40}
+                    textAnchor="start"
                     fontFamily={F}
                     fontSize={7.6}
                     fontStyle="italic"
@@ -1053,13 +1079,7 @@ export function SldSvg({
                   </text>
                 )}
                 {bat && (
-                  <text
-                    x={xInv + wInv + 16}
-                    y={invY + stackH + 26}
-                    fontFamily={F}
-                    fontSize={7.6}
-                    fill={C.ac}
-                  >
+                  <text x={xInv + wInv + 24} y={dcY + 56} fontFamily={F} fontSize={7.6} fill={C.ac}>
                     EPS / BACKUP
                   </text>
                 )}
@@ -1165,8 +1185,8 @@ export function SldSvg({
                   text={m.cables.find((c) => /BAT/.test(c.route))?.tag || "W3"}
                   color={C.dc}
                 />
-                <VoltageDropBadge x={riser + 62} y={batY + 20} calc={calc("W3")} />
-                <text x={riser + 6} y={invY + invH + 26} fontFamily={F} fontSize={7.6} fill={C.dc}>
+                <VoltageDropBadge x={riser - 70} y={batY + 50} calc={calc("W3")} />
+                <text x={riser + 8} y={batY - 44} fontFamily={F} fontSize={7.6} fill={C.dc}>
                   BAT
                 </text>
               </g>
@@ -1177,15 +1197,15 @@ export function SldSvg({
         {ac && inv && (
           <>
             <line x1={xInv + wInv} y1={dcY} x2={xAc} y2={dcY} stroke={C.ac} strokeWidth={2} />
-            <WireTag x={(xInv + wInv + xAc) / 2} y={dcY - 8} text="W4" color={C.ac} />
-            <VoltageDropBadge x={(xInv + wInv + xAc) / 2} y={dcY + 28} calc={calc("W4")} />
-            <PhaseMark x={(xInv + wInv + xAc) / 2} y={dcY} phase3={phase3} />
+            <WireTag x={(xInv + wInv + xAc) / 2} y={dcY - 22} text="W4" color={C.ac} />
+            <VoltageDropBadge x={(xInv + wInv + xAc) / 2} y={dcY + 38} calc={calc("W4")} />
+            <PhaseMark x={(xInv + wInv + xAc) / 2 - 34} y={dcY} phase3={phase3} />
             <Node x={xAc} y={dcY} color={C.ac} />
             <Block
               x={xAc}
-              y={invY - 6}
+              y={acBoxY}
               w={wAc}
-              h={invH + 12}
+              h={acBoxH}
               title="AC PROTECTION BOARD"
               lines={[
                 `Main ${ac.breakerA} A ${ac.phase3 ? "4P" : "2P"} — IP54`,
@@ -1202,9 +1222,10 @@ export function SldSvg({
               real={real}
             />
 
-            <BreakerSymbol x={xAc + wAc - 24} y={dcY} />
-            <SpdSymbol x={xAc + 22} y={dcY + 26} />
-            <RcdSymbol x={xAc + wAc - 24} y={dcY - 34} color={C.ac} />
+            {/* الرموز تُرسم على الموصلات خارج الصندوق حتى لا تحجب أسطر المواصفات */}
+            <BreakerSymbol x={xAc + wAc + 22} y={dcY} />
+            <SpdSymbol x={xAc + 22} y={acBoxY + acBoxH + 16} />
+            <RcdSymbol x={xAc - 34} y={dcY} color={C.ac} />
           </>
         )}
 
@@ -1215,9 +1236,9 @@ export function SldSvg({
             <Node x={xAts} y={dcY} color={C.ac} />
             <Block
               x={xAts}
-              y={invY}
+              y={acBoxY + 6}
               w={wAts}
-              h={invH}
+              h={acBoxH - 12}
               title="ATS CHANGEOVER"
               lines={[
                 "Grid / Generator",
@@ -1314,7 +1335,7 @@ export function SldSvg({
                   <Node x={xOut - 26} y={dcY} color={C.ac} />
                   {backup && <PhaseMark x={(from + xOut) / 2 - 30} y={dcY} phase3={phase3} />}
                   {backup && (
-                    <WireTag x={(from + xOut) / 2 - 56} y={dcY - 8} text="W5" color={C.ac} />
+                    <WireTag x={(from + xOut) / 2 - 56} y={dcY - 22} text="W5" color={C.ac} />
                   )}
                   {backup && (
                     <VoltageDropBadge x={(from + xOut) / 2 - 56} y={dcY + 28} calc={calc("W5")} />
@@ -1440,7 +1461,7 @@ export function SldSvg({
                   />
                   <Node x={xOut - 26} y={dcY} color={C.ac} />
                   <PhaseMark x={(from + xOut) / 2 + 26} y={dcY} phase3={phase3} />
-                  <WireTag x={(from + xOut) / 2} y={dcY - 8} text="W5" color={C.ac} />
+                  <WireTag x={(from + xOut) / 2} y={dcY - 22} text="W5" color={C.ac} />
                   <VoltageDropBadge x={(from + xOut) / 2} y={dcY + 28} calc={calc("W5")} />
                 </>
               )}
@@ -1531,7 +1552,7 @@ export function SldSvg({
                     />
                     <Node x={riser} y={commY + 16} color={C.comm} />
                     <WireTag
-                      x={(xOut - 62 + riser) / 2}
+                      x={(xOut - 62 + riser) / 2 + 60}
                       y={commY + 11}
                       text="C2 — METER RS485 (Modbus)"
                       color={C.comm}
@@ -1627,13 +1648,13 @@ export function SldSvg({
             const bonds: { x: number; label: string }[] = [
               { x: xPv + 60, label: "ARRAY FRAMES 6 mm²" },
               ...(dc ? [{ x: xDc + wDc / 2, label: "DC BOARD + SPD" }] : []),
-              ...(bat ? [{ x: xInv - 244, label: "BATTERY RACK" }] : []),
+              ...(bat ? [{ x: xInv - 80, label: "BATTERY RACK" }] : []),
               ...(inv ? [{ x: xInv + wInv / 2, label: "INVERTER CHASSIS" }] : []),
               ...(ac ? [{ x: xAc + wAc / 2, label: "AC BOARD + SPD" }] : []),
               ...(m.ats ? [{ x: xAts + wAts / 2, label: "ATS ENCLOSURE" }] : []),
               { x: xOut + 40, label: "LOADS PANEL PE" },
             ];
-            const mebX = xInv + wInv / 2 - 86;
+            const mebX = xInv - 150;
             const mebW = 172;
             return (
               <g
@@ -1672,7 +1693,7 @@ export function SldSvg({
                     <Node x={bnd.x} y={earthY} color={C.earth} />
                     <text
                       x={bnd.x}
-                      y={earthY + 13}
+                      y={earthY + 20}
                       textAnchor="middle"
                       fontFamily={F}
                       fontSize={6.6}
@@ -1770,9 +1791,9 @@ export function SldSvg({
                     />
                     <Node x={xPv + 18} y={earthY} color={C.earth} />
                     <text
-                      x={xPv + 18}
+                      x={xPv}
                       y={earthY - 46}
-                      textAnchor="middle"
+                      textAnchor="start"
                       fontFamily={F}
                       fontSize={6.8}
                       fontWeight={700}

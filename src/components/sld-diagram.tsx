@@ -380,7 +380,7 @@ function Block({
         {/* ظل أرضي ناعم يثبّت المجسم بصرياً */}
         <ellipse
           cx={cx}
-          cy={cy + ((h - 14) * SC) / 2 + 4}
+          cy={cy + ((h - 14) * SC) / 2 + 12}
           rx={(w * SC) / 2.6}
           ry={3.4}
           fill={C.soft}
@@ -389,7 +389,7 @@ function Block({
         <g>
           <rect
             x={cx - lw / 2}
-            y={cy + ((h - 14) * SC) / 2 + 9}
+            y={cy + ((h - 14) * SC) / 2 + 18}
             width={lw}
             height={15}
             rx={7.5}
@@ -400,7 +400,7 @@ function Block({
           />
           <text
             x={cx}
-            y={cy + ((h - 14) * SC) / 2 + 19.6}
+            y={cy + ((h - 14) * SC) / 2 + 28.6}
             textAnchor="middle"
             fontFamily={F}
             fontSize={9}

@@ -619,7 +619,8 @@ export function SldSvg({
   const invY = busY - stackH / 2;
   const invH = stackH;
 
-  const batY = Math.max(busY + 150, invY + stackH + 96);
+  // في الوضع الواقعي تُنزَل خزانة البطاريات لإتاحة مساحة للمجسمات المكبّرة وتسمياتها.
+  const batY = Math.max(busY + 150, invY + stackH + 96) + (real ? 54 : 0);
   const bottom = Math.max(busY + 120, batY + 70, invY + stackH + 40);
   const earthY = bottom + 72;
   const H = earthY + 72;

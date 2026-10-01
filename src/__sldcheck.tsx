@@ -6,8 +6,8 @@ import { SldSvg } from "@/components/sld-diagram";
 import fs from "fs";
 
 const cases: Record<string, any> = {
-  i20t52: { panel_w: 720, panel_qty: 52, strings: 4, per_string: 13, inverter: "Deye 20kW", inv_kw: 20, inv_qty: 1, phase3: true, bat_kwh: 16.076, bat_qty: 4, bat_vdc: 51.2, quote_items: {} },
-  big125x6: { panel_w: 720, panel_qty: 1020, strings: 60, per_string: 17, inverter: "Solis 125kW", inv_kw: 125, inv_qty: 6, phase3: true, bat_kwh: 35.5, bat_qty: 12, bat_vdc: 512, quote_items: {} },
+  i20t52: { panel: { model: "STP720S", wp: 720, voc: 46, vmp: 38, imp: 18, isc: 19 }, inv: { model: "Deye SUN-20K", kwac: 20, vbat: 51.2 }, bat: { model: "UF5000", kwh: 16.076 }, nStr: 4, perStr: 13, nPan: 52, nInv: 1, nBat: 4, phase3: true, mpptPerInv: 2, sysLabel: "Commercial Hybrid" },
+  big125x6: { panel: { model: "STP720S", wp: 720, voc: 46, vmp: 38, imp: 18, isc: 19 }, inv: { model: "Solis S6-125K", kwac: 125, vbat: 512 }, bat: { model: "Optimus", kwh: 35.5 }, nStr: 60, perStr: 17, nPan: 1020, nInv: 6, nBat: 12, phase3: true, mpptPerInv: 10, sysLabel: "Industrial" },
 };
 for (const [name, p] of Object.entries(cases)) {
   const m = buildSld(p);

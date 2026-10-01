@@ -5513,6 +5513,7 @@ export function runStateMachine(__session, __parsed, __itemPrices) {
         } else {
           study_params = null;
           send_study_file = false;
+          __buildStudy = false;
         }
       } else {
         var spCode = (system_type && RES_QUOTE_NUM[system_type]) ? system_type : (((lookupByBill(parseFloat(monthly_consumption), '1') || {}).code) || 'r1');

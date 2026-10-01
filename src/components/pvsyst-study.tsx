@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   ArrowLeft,
+  Headphones,
   Boxes,
   CloudSun,
   Compass,

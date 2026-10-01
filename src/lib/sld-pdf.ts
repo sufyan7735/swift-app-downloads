@@ -43,7 +43,7 @@ export function downloadSldSheet(m: SldModel, number?: string, calcs?: CableCalc
   </div>`;
 
   const calcOf = (tag: string) => calcs?.find((c) => c.tag === tag);
-  const anyCustom = Boolean(calcs?.some((c) => c.custom));
+  const anyCustom = Boolean(calcs?.some((c) => c.custom || c.customArea));
 
   const cables = m.cables.length
     ? `<table class="dt">
@@ -54,7 +54,7 @@ export function downloadSldSheet(m: SldModel, number?: string, calcs?: CableCalc
             const len = k ? `${k.length} m${k.custom ? " *" : ""}` : "—";
             const dv = k && k.dropPct !== null ? `${k.dropPct}%` : "—";
             const warn = k && k.dropPct !== null && k.dropPct > 3 ? ' style="color:#b4231f;font-weight:700"' : "";
-            return `<tr><td class="c b">${esc(c.tag)}</td><td>${esc(c.route)}</td><td>${esc(c.spec)}</td><td class="c">${esc(len)}</td><td class="c"${warn}>${esc(dv)}</td></tr>`;
+            return `<tr><td class="c b">${esc(c.tag)}</td><td>${esc(c.route)}</td><td>${esc(k?.spec || c.spec)}${k?.awg ? ` — ${esc(k.awg)}` : ""}</td><td class="c">${esc(len)}</td><td class="c"${warn}>${esc(dv)}</td></tr>`;
           })
           .join("")}</tbody>
        </table>

@@ -1032,13 +1032,15 @@ export default function SldDiagram({ params, number, actions }: Props) {
   const [saving, setSaving] = useState(false);
   /** أطوال الكابلات الفعلية التي يدخلها المهندس يدوياً — اختيارية بالكامل. */
   const [lengths, setLengths] = useState<CableLengths>({});
+  /** مقاطع الكابلات المختارة يدوياً، مع بقاء نموذج عرض السعر دون تعديل. */
+  const [areas, setAreas] = useState<CableAreas>({});
   const [lenOpen, setLenOpen] = useState(false);
 
   const [rot, setRot] = useState<{ on: boolean; w: number; h: number }>({ on: false, w: 0, h: 0 });
   const drag = useRef<{ x: number; y: number; px: number; py: number } | null>(null);
   const boxRef = useRef<HTMLDivElement | null>(null);
-  const calcs: CableCalc[] = useMemo(() => (model ? cableCalcs(model, lengths) : []), [model, lengths]);
-  const items = useMemo(() => (model ? inspectorItems(model, lengths) : {}), [model, lengths]);
+  const calcs: CableCalc[] = useMemo(() => (model ? cableCalcs(model, lengths, areas) : []), [model, lengths, areas]);
+  const items = useMemo(() => (model ? inspectorItems(model, lengths, areas) : {}), [model, lengths, areas]);
   const mppt = useMemo(() => (model ? mpptMap(model) : []), [model]);
 
 
@@ -1059,7 +1061,7 @@ export default function SldDiagram({ params, number, actions }: Props) {
       // ملاءمة تلقائية: يضبط ارتفاع مساحة العرض على نسبة الرسم فيظهر كبيراً وكاملاً دون قطع.
       const svg = box.querySelector("svg");
       const vb = svg?.getAttribute("viewBox")?.split(/\s+/).map(Number);
-      const vw = vb && vb.length === 4 ? (vb[2] as number) : 1240;
+      const vw = vb && vb.length === 4 ? (vb[2] as number) : 1560;
       const vh = vb && vb.length === 4 ? (vb[3] as number) : 520;
       if (!rotated && !full) {
         const ideal = Math.round((cw * vh) / vw) + 8;
@@ -1100,8 +1102,8 @@ export default function SldDiagram({ params, number, actions }: Props) {
     setSaving(true);
     const bgColor = theme === "paper" ? "#ffffff" : "#0b2545";
     const clone = src.cloneNode(true) as SVGSVGElement;
-    const vb = (clone.getAttribute("viewBox") || "0 0 1240 520").split(/\s+/).map(Number);
-    const vw = vb[2] || 1240;
+    const vb = (clone.getAttribute("viewBox") || "0 0 1560 520").split(/\s+/).map(Number);
+    const vw = vb[2] || 1560;
     const vh = vb[3] || 520;
     clone.setAttribute("width", String(vw));
     clone.setAttribute("height", String(vh));
@@ -1146,10 +1148,12 @@ export default function SldDiagram({ params, number, actions }: Props) {
   const flowBar = (
     <div className="flex flex-wrap items-center gap-1.5" dir="rtl">
       {FLOWS.map((f) => (
-        <button
+        <Button
           key={f.id}
           type="button"
           onClick={() => setFlow(f.id)}
+          variant="outline"
+          size="sm"
           className={`rounded-full border px-3 py-1.5 text-[10.5px] font-black transition ${
             flow === f.id
               ? "border-brand bg-brand text-brand-foreground"
@@ -1157,7 +1161,7 @@ export default function SldDiagram({ params, number, actions }: Props) {
           }`}
         >
           {f.label}
-        </button>
+        </Button>
       ))}
     </div>
   );
@@ -1386,34 +1390,39 @@ export default function SldDiagram({ params, number, actions }: Props) {
           <div className="mt-4 flex flex-wrap items-center justify-between gap-2" dir="rtl">
             <h4 className="text-xs font-black text-skyline">جدول الكابلات والحسابات الكهربائية</h4>
             <div className="flex items-center gap-1.5">
-              <button
+              <Button
                 type="button"
                 onClick={() => setLenOpen((v) => !v)}
+                variant="outline"
+                size="sm"
                 className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10.5px] font-black transition ${
                   lenOpen ? "border-brand bg-brand text-brand-foreground" : "border-border bg-card text-skyline hover:border-brand hover:text-brand"
                 }`}
               >
                 <Ruler className="size-3.5" />
                 {lenOpen ? "إنهاء تعديل الأطوال" : "تعديل أطوال الكابلات (اختياري)"}
-              </button>
-              {Object.keys(lengths).length > 0 && (
-                <button
+              </Button>
+              {(Object.keys(lengths).length > 0 || Object.keys(areas).length > 0) && (
+                <Button
                   type="button"
-                  onClick={() => setLengths({})}
+                  onClick={() => { setLengths({}); setAreas({}); }}
+                  variant="outline"
+                  size="sm"
                   className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-[10.5px] font-black text-skyline transition hover:border-brand hover:text-brand"
                 >
-                  <RotateCcw className="size-3.5" /> استعادة الأطوال الافتراضية
-                </button>
+                  <RotateCcw className="size-3.5" /> استعادة القيم الافتراضية
+                </Button>
               )}
             </div>
           </div>
           <div className="mt-2 -mx-1 overflow-x-auto px-1" data-quote-scroll dir="ltr">
-            <table className="w-full min-w-[620px] border-collapse text-[10.5px]">
+            <table className="w-full min-w-[820px] border-collapse text-[10.5px]">
               <thead>
                 <tr className="bg-brand text-brand-foreground">
                   <th className="border border-border px-2 py-1.5 font-black">TAG</th>
                   <th className="border border-border px-2 py-1.5 font-black">ROUTE</th>
                   <th className="border border-border px-2 py-1.5 font-black">CABLE</th>
+                  <th className="border border-border px-2 py-1.5 font-black">SIZE / AWG</th>
                   <th className="border border-border px-2 py-1.5 font-black">L (m)</th>
                   <th className="border border-border px-2 py-1.5 font-black">Vdrop</th>
                   <th className="border border-border px-2 py-1.5 font-black">Icu</th>
@@ -1425,6 +1434,28 @@ export default function SldDiagram({ params, number, actions }: Props) {
                     <td className="border border-border px-2 py-1 text-center font-black">{c.tag}</td>
                     <td className="border border-border px-2 py-1">{c.route}</td>
                     <td className="border border-border px-2 py-1">{c.spec}</td>
+                    <td className="min-w-[150px] border border-border px-2 py-1 text-center">
+                      {c.area && c.kind !== "earth" && c.kind !== "comm" ? (
+                        <Select
+                          value={String(c.area)}
+                          onValueChange={(value) => {
+                            const nextArea = Number(value);
+                            setAreas((prev) => ({ ...prev, [c.tag]: nextArea }));
+                          }}
+                        >
+                          <SelectTrigger className="h-8 min-w-[138px] bg-background text-[10px] font-black" aria-label={`مقطع الكابل ${c.tag}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {cableSizeOptions(c.area).map((option) => (
+                              <SelectItem key={option.area} value={String(option.area)} className="text-[11px]" dir="ltr">
+                                {option.area} mm² / {option.awg}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : "—"}
+                    </td>
                     <td className="border border-border px-2 py-1 text-center">
                       {lenOpen ? (
                         <input
@@ -1455,8 +1486,13 @@ export default function SldDiagram({ params, number, actions }: Props) {
                         </span>
                       )}
                     </td>
-                    <td className={`border border-border px-2 py-1 text-center font-black ${c.dropPct !== null && c.dropPct > 3 ? "text-brand" : "text-energy"}`}>
-                      {c.dropPct !== null ? `${c.dropPct}%` : "—"}
+                    <td className="border border-border px-2 py-1 text-center font-black">
+                      {c.dropPct !== null ? (
+                        <span className={`inline-flex min-w-[78px] items-center justify-center gap-1 rounded-full border px-2 py-1 ${c.dropStatus === "warning" ? "border-destructive/35 bg-destructive/10 text-destructive" : "border-energy/35 bg-energy/10 text-energy"}`}>
+                          {c.dropStatus === "warning" ? <TriangleAlert className="size-3" /> : <CheckCircle2 className="size-3" />}
+                          {c.dropPct}% {c.dropStatus === "warning" ? "تحذير" : "OK"}
+                        </span>
+                      ) : "—"}
                     </td>
                     <td className="border border-border px-2 py-1 text-center">{c.kA ? `${c.kA} kA` : "—"}</td>
                   </tr>
@@ -1465,8 +1501,8 @@ export default function SldDiagram({ params, number, actions }: Props) {
             </table>
           </div>
           <p className="mt-1 text-[9.5px] text-muted-foreground" dir="rtl">
-            {Object.keys(lengths).length > 0
-              ? "* أطوال مُدخلة من المسح الموقعي، وهبوط الجهد أُعيد حسابه عليها (نحاس 0.0175 Ω·mm²/م)؛ الحد المقبول 3%."
+            {Object.keys(lengths).length > 0 || Object.keys(areas).length > 0
+              ? "* قيم معدّلة يدوياً؛ أُعيد حساب هبوط الجهد فورياً (نحاس 0.0175 Ω·mm²/م). مكافئ AWG تقريبي والحد المقبول 3%."
               : "هبوط الجهد محسوب على أطوال تصميمية نمطية (نحاس 0.0175 Ω·mm²/م) ويُراجع بعد المسح الموقعي؛ الحد المقبول 3%."}
           </p>
           {calcs.some((c) => c.dropPct !== null && c.dropPct > 3) && (

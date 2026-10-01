@@ -10,11 +10,8 @@ import optimusA300Catalog from "@/assets/products/pylontech-optimus-a300-hy.pdf.
 import lithium12v314ahImage from "@/assets/products/lithium-12v-314ah.png.asset.json";
 import heroeeNeoPower4G2Catalog from "@/assets/products/hithium-heroee-neopower-4-g2.pdf.asset.json";
 import legend112cImage from "@/assets/products/hithium-legend-112c.png.asset.json";
-import legend112cCatalog from "@/assets/products/hithium-legend-112c.pdf.asset.json";
 import optimusL260Image from "@/assets/products/pylontech-optimus-l260-hy.png.asset.json";
-import optimusL260Catalog from "@/assets/products/pylontech-optimus-l260-hy.pdf.asset.json";
 import legend112sImage from "@/assets/products/hithium-legend-112s.png.asset.json";
-import legend112sCatalog from "@/assets/products/hithium-legend-112s.pdf.asset.json";
 import cubeM1cImage from "@/assets/products/pylontech-powercube-m1c.png.asset.json";
 import uf5000Image from "@/assets/products/pylontech-uf5000.png.asset.json";
 import uf5000Catalog from "@/assets/products/pylontech-uf5000.pdf.asset.json";
@@ -1025,7 +1022,7 @@ export const PRODUCTS: Product[] = [
     ],
     certificates: "UN38.3",
     image: legend112cImage.url,
-    files: [{ kind: "Datasheet", label: "الكتالوج / Datasheet الرسمي", url: legend112cCatalog.url }],
+    files: [],
   },
   {
     id: "pylontech-optimus-l260-hy",

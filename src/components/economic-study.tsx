@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, BadgeDollarSign, Download, Headphones, Leaf, LineChart, Network, RotateCcw, ShoppingCart } from "lucide-react";
-import { buildPvsystStudy } from "@/lib/pvsyst-engine";
+import { buildPvsystStudy, STUDY_SITE_NAMES } from "@/lib/pvsyst-engine";
 import {
   buildEconomics,
   capexFromQuoteItems,

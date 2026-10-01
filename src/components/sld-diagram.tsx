@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, Boxes, Download, Expand, FileDown, ImageDown, LineChart, Minus, Move, Network, Palette, Plus, Ruler, RotateCcw, Shrink, ShoppingCart, Waves, X } from "lucide-react";
+import { ArrowRight, Boxes, CheckCircle2, Download, Expand, FileDown, ImageDown, LineChart, Minus, Move, Network, Palette, Plus, Ruler, RotateCcw, Shrink, ShoppingCart, TriangleAlert, Waves, X } from "lucide-react";
 import { buildSld, type SldModel } from "@/lib/sld-engine";
-import { cableCalcs, defaultLengthOf, inspectorItems, type CableCalc, type CableLengths } from "@/lib/sld-annotations";
+import { cableCalcs, cableSizeOptions, defaultLengthOf, inspectorItems, type CableAreas, type CableCalc, type CableLengths } from "@/lib/sld-annotations";
 import { downloadSldSheet } from "@/lib/sld-pdf";
 import { downloadSldDxf } from "@/lib/sld-dxf";
 import { mpptMap, mpptMapByInverter } from "@/lib/sld-mppt";
 import { EquipArt, PvRealSymbol, type EquipKind } from "@/components/sld-equipment";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import logoAsset from "@/assets/actes-logo-sld.png.asset.json";
 
 
@@ -233,6 +235,23 @@ function WireTag({ x, y, text: label, color }: { x: number; y: number; text: str
   );
 }
 
+/** شارة فورية لهبوط الجهد، مرتبطة بحساب الكابل الحالي. */
+function VoltageDropBadge({ x, y, calc }: { x: number; y: number; calc?: CableCalc | undefined }) {
+  const warning = calc?.dropStatus === "warning";
+  const ok = calc?.dropStatus === "ok";
+  const label = calc?.dropPct === null || !calc ? "Vdrop —" : `${calc.dropPct}% ${warning ? "WARN" : "OK"}`;
+  const width = warning ? 88 : 72;
+  const fill = warning ? "var(--sld-warn-bg)" : ok ? "var(--sld-ok-bg)" : C.band;
+  const ink = warning ? "var(--sld-warn)" : ok ? "var(--sld-ok)" : C.soft;
+  return (
+    <g transform={`translate(${x - width / 2} ${y - 11})`} pointerEvents="none">
+      <rect width={width} height={22} rx={11} fill={fill} stroke={ink} strokeWidth={1.2} />
+      <circle cx={11} cy={11} r={3.5} fill={ink} />
+      <text x={width / 2 + 4} y={14} textAnchor="middle" fontFamily={F} fontSize={8.2} fontWeight={800} fill={ink}>{label}</text>
+    </g>
+  );
+}
+
 /** رمز مفتاح عزل ميكانيكي (DC Rotary Isolator) للفصل اليدوي أثناء الصيانة. */
 function IsolatorSymbol({ x, y, color }: { x: number; y: number; color: string }) {
   return (
@@ -277,7 +296,7 @@ export function SldSvg({
   /** عرض المعدات بمجسماتها الواقعية بدل الرموز القياسية. */
   real?: boolean;
 }) {
-  const W = 1240;
+  const W = 1560;
   const drawnStrings = Math.min(m.pv?.strings || 1, 4);
   const pvTop = 52;
   const rowH = 44;
@@ -311,29 +330,26 @@ export function SldSvg({
   const batArt: EquipKind = (m.battery?.vdc || 0) >= 96 ? "battery-rack" : "battery-wall";
 
 
-  const xPv = 24;
-  const wPv = 180;
-  const xDc = 250;
-  const wDc = 132;
-  const xInv = 430;
-  const wInv = 168;
-  const xAc = 650;
-  const wAc = 140;
-  const xAts = 840;
-  const wAts = 128;
-  const xOut = 1016;
-  const wOut = 200;
+  const xPv = 34;
+  const wPv = 198;
+  const xDc = 308;
+  const wDc = 146;
+  const xInv = 558;
+  const wInv = 184;
+  const xAc = 840;
+  const wAc = 154;
+  const xAts = 1090;
+  const wAts = 142;
+  const xOut = 1320;
+  const wOut = 206;
 
   const phase3 = Boolean(inv?.phase3 || ac?.phase3);
 
-  const drop = (tag: string) => {
-    const c = calcs?.find((x) => x.tag === tag);
-    return c && c.dropPct !== null ? ` — ${c.dropPct}%` : "";
-  };
+  const calc = (tag: string) => calcs?.find((item) => item.tag === tag);
 
   // سيناريوهات تدفق الطاقة: تُبرز المسار العامل وتُخفت المسار المعزول.
   const opPv = flow === "night" ? 0.2 : 1;
-  const opGrid = flow === "outage" ? 0.16 : flow === "day" ? 0.5 : 1;
+  const opGrid = flow === "outage" || flow === "night" ? 0.16 : flow === "day" ? 0.5 : 1;
   const opBat = flow === "day" ? 0.85 : 1;
   const opEps = flow === "outage" || flow === "night" ? 1 : 0.9;
   const wEps = flow === "outage" || flow === "night" ? 3.6 : 2;
